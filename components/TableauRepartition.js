@@ -21,7 +21,7 @@ export default function TableauRepartition({ titre, effectifData, onDataChange }
 
   useEffect(() => {
     if (onDataChange) onDataChange(repartitions);
-  }, [repartitions]);
+  }, [repartitions, onDataChange]); // ✅ تم إصلاح التحذير هنا
 
   const handleChange = (index, type, value) => {
     const newReps = [...repartitions];
@@ -76,17 +76,6 @@ export default function TableauRepartition({ titre, effectifData, onDataChange }
           ))}
         </tbody>
       </table>
-
-      <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 mb-4">
-        <div>
-          <p><strong>Moyenne Théorique / Groupe:</strong> {moyenneColonne(repartitions.map(r => parseFloat(r.besoinTheoParGroupe || 0)))}</p>
-          <p><strong>Total Théorique:</strong> {sommeColonne(repartitions.map(r => r.besoinTheoTotal))}</p>
-        </div>
-        <div>
-          <p><strong>Moyenne Pratique / Groupe:</strong> {moyenneColonne(repartitions.map(r => parseFloat(r.besoinPratParGroupe || 0)))}</p>
-          <p><strong>Total Pratique:</strong> {sommeColonne(repartitions.map(r => r.besoinPratTotal))}</p>
-        </div>
-      </div>
     </div>
   );
 }

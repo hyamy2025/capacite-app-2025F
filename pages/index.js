@@ -35,7 +35,7 @@ export default function Home() {
           className="mx-auto mb-4"
         />
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-          Diagnostic de la Capacité d’Accueil
+          Diagnostic de la Capacité d&apos;Accueil
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
@@ -53,7 +53,7 @@ export default function Home() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              N° d'enregistrement
+              N° d&apos;enregistrement
             </label>
             <input
               type="text"
