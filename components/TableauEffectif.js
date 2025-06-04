@@ -22,21 +22,27 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
       if (type === 'nom') {
         newData[index].nom = value;
       } else {
-        newData[index].sessions[sessionIdx][field] = value;
+        if (
+          Array.isArray(newData[index].sessions) &&
+          newData[index].sessions[sessionIdx]
+        ) {
+          newData[index].sessions[sessionIdx][field] = value;
+        }
       }
     } else {
+      if (!newData[index][type]) newData[index][type] = {};
       newData[index][type][field] = value;
 
-      // Calcul automatique du champ "ajout.apprenants" et "total"
-      const ajoutGroupes = parseInt(newData[index].ajout.groupes || 0);
-      const surfaceMoyenne = 26; // Peut être adapté
+      // حماية عند الحساب
+      const ajoutGroupes = parseInt(newData[index]?.ajout?.groupes ?? 0);
+      const surfaceMoyenne = 26; // يمكن تعديله
       newData[index].ajout.apprenants = ajoutGroupes * surfaceMoyenne;
 
       newData[index].total.groupes =
-        parseInt(newData[index].existant.groupes || 0) + ajoutGroupes;
+        parseInt(newData[index]?.existant?.groupes ?? 0) + ajoutGroupes;
       newData[index].total.apprenants =
-        parseInt(newData[index].existant.apprenants || 0) +
-        newData[index].ajout.apprenants;
+        parseInt(newData[index]?.existant?.apprenants ?? 0) +
+        newData[index]?.ajout?.apprenants ?? 0;
     }
     setHistorique([...historique, specialites]);
     setSpecialites(newData);
@@ -61,7 +67,9 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
 
   const ajouterSession = (index) => {
     const newData = [...specialites];
-    newData[index].sessions.push({ nom: '', groupes: '', apprenants: '' });
+    if (Array.isArray(newData[index].sessions)) {
+      newData[index].sessions.push({ nom: '', groupes: '', apprenants: '' });
+    }
     setSpecialites(newData);
   };
 
@@ -97,14 +105,14 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
           </tr>
         </thead>
         <tbody>
-          {specialites.map((spec, idx) => (
+          {(specialites ?? []).map((spec = {}, idx) =>
             modeActuel ? (
-              spec.sessions.map((sess, sidx) => (
+              (spec.sessions ?? []).map((sess = {}, sidx) => (
                 <tr key={`${idx}-${sidx}`}>
                   <td className="border p-2">
                     <input
                       type="text"
-                      value={spec.nom}
+                      value={spec.nom ?? ''}
                       onChange={(e) => handleChange(idx, 'nom', null, e.target.value)}
                       className="w-full border p-1 rounded"
                     />
@@ -112,7 +120,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                   <td className="border p-2">
                     <input
                       type="text"
-                      value={sess.nom}
+                      value={sess.nom ?? ''}
                       onChange={(e) => handleChange(idx, null, 'nom', e.target.value, sidx)}
                       className="w-full border p-1 rounded"
                     />
@@ -120,7 +128,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                   <td className="border p-2">
                     <input
                       type="number"
-                      value={sess.groupes}
+                      value={sess.groupes ?? 0}
                       onChange={(e) => handleChange(idx, null, 'groupes', e.target.value, sidx)}
                       className="w-full border p-1 rounded"
                     />
@@ -128,7 +136,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                   <td className="border p-2">
                     <input
                       type="number"
-                      value={sess.apprenants}
+                      value={sess.apprenants ?? 0}
                       onChange={(e) => handleChange(idx, null, 'apprenants', e.target.value, sidx)}
                       className="w-full border p-1 rounded"
                     />
@@ -140,43 +148,43 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                 <td className="border p-2">
                   <input
                     type="text"
-                    value={spec.nom}
+                    value={spec.nom ?? ''}
                     onChange={(e) => handleChange(idx, 'nom', null, e.target.value)}
                     className="w-full border p-1 rounded"
                   />
                 </td>
                 <td className="border p-2 text-center">
-                  {['groupes', 'apprenants'].map(f => (
+                  {['groupes', 'apprenants'].map((f) => (
                     <input
                       key={f}
                       type="number"
-                      value={spec.existant[f]}
+                      value={spec.existant?.[f] ?? 0}
                       onChange={(e) => handleChange(idx, 'existant', f, e.target.value)}
                       className="w-1/2 border p-1 rounded m-1"
                     />
                   ))}
                 </td>
                 <td className="border p-2 text-center">
-                  {['groupes', 'apprenants'].map(f => (
+                  {['groupes', 'apprenants'].map((f) => (
                     <input
                       key={f}
                       type="number"
-                      value={spec.ajout[f]}
+                      value={spec.ajout?.[f] ?? 0}
                       onChange={(e) => handleChange(idx, 'ajout', f, e.target.value)}
                       className="w-1/2 border p-1 rounded m-1"
                     />
                   ))}
                 </td>
                 <td className="border p-2 text-center">
-                  {['groupes', 'apprenants'].map(f => (
+                  {['groupes', 'apprenants'].map((f) => (
                     <span key={f} className="block">
-                      {spec.total[f]}
+                      {spec.total?.[f] ?? 0}
                     </span>
                   ))}
                 </td>
               </tr>
             )
-          ))}
+          )}
         </tbody>
       </table>
 
@@ -186,21 +194,21 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
             <strong>Total Groupes:</strong>{' '}
             {modeActuel
               ? sommeColonne(
-                  specialites.flatMap((s) =>
-                    s.sessions.map((sess) => parseInt(sess.groupes || 0))
+                  (specialites ?? []).flatMap((s = {}) =>
+                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.groupes ?? 0))
                   )
                 )
-              : sommeColonne(specialites.map((s) => s.total.groupes))}
+              : sommeColonne((specialites ?? []).map((s = {}) => s.total?.groupes ?? 0))}
           </p>
           <p>
             <strong>Total Apprenants:</strong>{' '}
             {modeActuel
               ? sommeColonne(
-                  specialites.flatMap((s) =>
-                    s.sessions.map((sess) => parseInt(sess.apprenants || 0))
+                  (specialites ?? []).flatMap((s = {}) =>
+                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.apprenants ?? 0))
                   )
                 )
-              : sommeColonne(specialites.map((s) => s.total.apprenants))}
+              : sommeColonne((specialites ?? []).map((s = {}) => s.total?.apprenants ?? 0))}
           </p>
         </div>
         <div className="flex gap-2">
