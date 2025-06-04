@@ -1,120 +1,125 @@
-import { useState } from 'react';
-import {
-  calculerSurfacePedagogique,
-  calculerHeuresMax,
-  moyenneColonne,
-  sommeColonne,
-} from '../utils/calculs';
+import { useState, useEffect } from 'react';
+import { sommeColonne, moyenneColonne } from '../utils/calculs';
 
-export default function TableauSalle({ titre }) {
+export default function TableauSalles({ titre, onDataChange }) {
   const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
+    { nom: '', surfaceP: '', heuresParJour: '', semaines: 56 }
   ]);
+
   const [historique, setHistorique] = useState([]);
 
+  useEffect(() => {
+    const updated = salles.map((salle) => {
+      const heuresParJour = parseFloat(salle.heuresParJour) || 0;
+      const semaines = parseInt(salle.semaines) || 0;
+      return {
+        ...salle,
+        heuresMax: heuresParJour * semaines,
+      };
+    });
+
+    setSalles(updated);
+
+    if (onDataChange) {
+      const heuresTotales = sommeColonne(updated.map(s => s.heuresMax));
+      const surfaceMoyenne = moyenneColonne(updated.map(s => parseFloat(s.surfaceP) || 0));
+      onDataChange(updated, heuresTotales, surfaceMoyenne);
+    }
+  }, [salles]);
+
   const handleChange = (index, field, value) => {
-    const newSalles = [...salles];
-    newSalles[index][field] = field === 'cno' ? parseFloat(value) : value;
-    if (field === 'surface' || field === 'cno') {
-      newSalles[index].surfaceP = calculerSurfacePedagogique(
-        parseFloat(newSalles[index].surface || 0),
-        parseFloat(newSalles[index].cno || 1)
-      );
-    }
-    if (field === 'semaines') {
-      newSalles[index].heuresMax = calculerHeuresMax(parseInt(value || 0));
-    }
-    setHistorique([...historique, salles]);
-    setSalles(newSalles);
+    setHistorique([...historique, salles]); // 🔄 حفظ النسخة السابقة
+    const updated = [...salles];
+    updated[index][field] = value;
+    setSalles(updated);
   };
 
   const ajouterSalle = () => {
     setHistorique([...historique, salles]);
     setSalles([
       ...salles,
-      { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
+      { nom: '', surfaceP: '', heuresParJour: '', semaines: 56 }
     ]);
   };
 
-  const annulerModification = () => {
+  const annuler = () => {
     if (historique.length > 0) {
-      const dernierEtat = historique[historique.length - 1];
-      setSalles(dernierEtat);
+      const previous = historique[historique.length - 1];
       setHistorique(historique.slice(0, -1));
+      setSalles(previous);
     }
   };
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
+
       <table className="w-full table-auto border text-sm">
         <thead className="bg-gray-200">
           <tr>
-            <th className="border p-2">Code</th>
-            <th className="border p-2">Surface (m²)</th>
-            <th className="border p-2">CNO</th>
-            <th className="border p-2">Surface Pédagogique</th>
+            <th className="border p-2">Nom Salle</th>
+            <th className="border p-2">Surface pédagogique (m²)</th>
+            <th className="border p-2">Heures/Jour</th>
             <th className="border p-2">Semaines</th>
-            <th className="border p-2">Heures Max</th>
+            <th className="border p-2">Heures max</th>
           </tr>
         </thead>
         <tbody>
-          {salles.map((salle, index) => (
-            <tr key={index}>
-              <td className="border p-2 text-center">{index + 1}</td>
+          {salles.map((salle, idx) => (
+            <tr key={idx}>
               <td className="border p-2">
                 <input
-                  type="number"
-                  value={salle.surface}
-                  onChange={(e) => handleChange(index, 'surface', e.target.value)}
-                  className="w-full p-1 border rounded"
+                  type="text"
+                  value={salle.nom}
+                  onChange={(e) => handleChange(idx, 'nom', e.target.value)}
+                  className="w-full border p-1 rounded"
                 />
               </td>
               <td className="border p-2">
-                <select
-                  value={salle.cno}
-                  onChange={(e) => handleChange(index, 'cno', e.target.value)}
-                  className="w-full p-1 border rounded"
-                >
-                  {Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1)).map((val) => (
-                    <option key={val} value={val}>{val}</option>
-                  ))}
-                </select>
+                <input
+                  type="number"
+                  value={salle.surfaceP}
+                  onChange={(e) => handleChange(idx, 'surfaceP', e.target.value)}
+                  className="w-full border p-1 rounded"
+                />
               </td>
-              <td className="border p-2 text-center">{salle.surfaceP}</td>
+              <td className="border p-2">
+                <input
+                  type="number"
+                  value={salle.heuresParJour}
+                  onChange={(e) => handleChange(idx, 'heuresParJour', e.target.value)}
+                  className="w-full border p-1 rounded"
+                />
+              </td>
               <td className="border p-2">
                 <input
                   type="number"
                   value={salle.semaines}
-                  onChange={(e) => handleChange(index, 'semaines', e.target.value)}
-                  className="w-full p-1 border rounded"
+                  onChange={(e) => handleChange(idx, 'semaines', e.target.value)}
+                  className="w-full border p-1 rounded"
                 />
               </td>
-              <td className="border p-2 text-center">{salle.heuresMax}</td>
+              <td className="border p-2 text-center">
+                {salle.heuresMax ?? 0}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div className="flex flex-wrap justify-between items-center mt-4 gap-4">
-        <div className="text-sm text-gray-700">
-          <p><strong>Moyenne Surface Pédagogique:</strong> {moyenneColonne(salles.map(s => s.surfaceP))}</p>
-          <p><strong>Total Heures Max:</strong> {sommeColonne(salles.map(s => s.heuresMax))}</p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={ajouterSalle}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          >
-            Ajouter une salle
-          </button>
-          <button
-            onClick={annulerModification}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-          >
-            Annuler
-          </button>
-        </div>
+      <div className="flex justify-end mt-4 gap-2">
+        <button
+          onClick={ajouterSalle}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          Ajouter une salle
+        </button>
+        <button
+          onClick={annuler}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+        >
+          Annuler
+        </button>
       </div>
     </div>
   );

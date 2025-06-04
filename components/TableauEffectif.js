@@ -1,56 +1,62 @@
 import { useState } from 'react';
 import { sommeColonne } from '../utils/calculs';
 
-export default function TableauEffectif({ titre, modeActuel = true }) {
-  const [specialites, setSpecialites] = useState([
-    {
-      nom: '',
-      sessions: modeActuel
-        ? [{ nom: '', groupes: '', apprenants: '' }]
-        : {
-            existant: { groupes: '', apprenants: '' },
-            ajout: { groupes: '', apprenants: 0 },
-            total: { groupes: 0, apprenants: 0 },
+export default function TableauEffectif({ titre, modeActuel = true, onDataChange, data }) {
+  const [specialites, setSpecialites] = useState(
+    data && Array.isArray(data) && data.length > 0
+      ? data
+      : [
+          {
+            nom: '',
+            sessions: modeActuel
+              ? [{ nom: '', groupes: '', apprenants: '' }]
+              : {
+                  existant: { groupes: '', apprenants: '' },
+                  ajout: { groupes: '', apprenants: 0 },
+                  total: { groupes: 0, apprenants: 0 },
+                },
           },
-    },
-  ]);
+        ]
+  );
   const [historique, setHistorique] = useState([]);
 
+  const majEtNotif = (newData) => {
+    setSpecialites(newData);
+    if (typeof onDataChange === 'function') onDataChange(newData);
+  };
+
   const handleChange = (index, type, field, value, sessionIdx = null) => {
-    const newData = [...specialites];
+    const newData = JSON.parse(JSON.stringify(specialites));
     if (modeActuel) {
       if (type === 'nom') {
         newData[index].nom = value;
-      } else {
-        if (
-          Array.isArray(newData[index].sessions) &&
-          newData[index].sessions[sessionIdx]
-        ) {
-          newData[index].sessions[sessionIdx][field] = value;
-        }
+      } else if (
+        Array.isArray(newData[index].sessions) &&
+        newData[index].sessions[sessionIdx]
+      ) {
+        newData[index].sessions[sessionIdx][field] = value;
       }
     } else {
       if (!newData[index][type]) newData[index][type] = {};
       newData[index][type][field] = value;
 
-      // حماية عند الحساب
-      const ajoutGroupes = parseInt(newData[index]?.ajout?.groupes ?? 0);
-      const surfaceMoyenne = 26; // يمكن تعديله
+      const ajoutGroupes = parseInt(newData[index]?.ajout?.groupes ?? 0) || 0;
+      const surfaceMoyenne = 26;
       newData[index].ajout.apprenants = ajoutGroupes * surfaceMoyenne;
 
       newData[index].total.groupes =
-        parseInt(newData[index]?.existant?.groupes ?? 0) + ajoutGroupes;
+        (parseInt(newData[index]?.existant?.groupes ?? 0) || 0) + ajoutGroupes;
       newData[index].total.apprenants =
-        parseInt(newData[index]?.existant?.apprenants ?? 0) +
-        newData[index]?.ajout?.apprenants ?? 0;
+        (parseInt(newData[index]?.existant?.apprenants ?? 0) || 0) +
+        (newData[index]?.ajout?.apprenants ?? 0);
     }
     setHistorique([...historique, specialites]);
-    setSpecialites(newData);
+    majEtNotif(newData);
   };
 
   const ajouterSpecialite = () => {
     setHistorique([...historique, specialites]);
-    setSpecialites([
+    majEtNotif([
       ...specialites,
       {
         nom: '',
@@ -66,11 +72,11 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
   };
 
   const ajouterSession = (index) => {
-    const newData = [...specialites];
-    if (Array.isArray(newData[index].sessions)) {
+    const newData = JSON.parse(JSON.stringify(specialites));
+    if (Array.isArray(newData[index]?.sessions)) {
       newData[index].sessions.push({ nom: '', groupes: '', apprenants: '' });
     }
-    setSpecialites(newData);
+    majEtNotif(newData);
   };
 
   const annuler = () => {
@@ -78,13 +84,13 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
       const dernier = historique[historique.length - 1];
       setSpecialites(dernier);
       setHistorique(historique.slice(0, -1));
+      if (typeof onDataChange === 'function') onDataChange(dernier);
     }
   };
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
-
       <table className="w-full table-auto border text-sm">
         <thead className="bg-gray-200">
           <tr>
@@ -128,7 +134,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                   <td className="border p-2">
                     <input
                       type="number"
-                      value={sess.groupes ?? 0}
+                      value={sess.groupes ?? ''}
                       onChange={(e) => handleChange(idx, null, 'groupes', e.target.value, sidx)}
                       className="w-full border p-1 rounded"
                     />
@@ -136,7 +142,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                   <td className="border p-2">
                     <input
                       type="number"
-                      value={sess.apprenants ?? 0}
+                      value={sess.apprenants ?? ''}
                       onChange={(e) => handleChange(idx, null, 'apprenants', e.target.value, sidx)}
                       className="w-full border p-1 rounded"
                     />
@@ -158,7 +164,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                     <input
                       key={f}
                       type="number"
-                      value={spec.existant?.[f] ?? 0}
+                      value={spec.existant?.[f] ?? ''}
                       onChange={(e) => handleChange(idx, 'existant', f, e.target.value)}
                       className="w-1/2 border p-1 rounded m-1"
                     />
@@ -169,7 +175,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
                     <input
                       key={f}
                       type="number"
-                      value={spec.ajout?.[f] ?? 0}
+                      value={spec.ajout?.[f] ?? ''}
                       onChange={(e) => handleChange(idx, 'ajout', f, e.target.value)}
                       className="w-1/2 border p-1 rounded m-1"
                     />
@@ -195,7 +201,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
             {modeActuel
               ? sommeColonne(
                   (specialites ?? []).flatMap((s = {}) =>
-                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.groupes ?? 0))
+                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.groupes ?? 0) || 0)
                   )
                 )
               : sommeColonne((specialites ?? []).map((s = {}) => s.total?.groupes ?? 0))}
@@ -205,7 +211,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
             {modeActuel
               ? sommeColonne(
                   (specialites ?? []).flatMap((s = {}) =>
-                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.apprenants ?? 0))
+                    (s.sessions ?? []).map((sess = {}) => parseInt(sess.apprenants ?? 0) || 0)
                   )
                 )
               : sommeColonne((specialites ?? []).map((s = {}) => s.total?.apprenants ?? 0))}
@@ -214,7 +220,7 @@ export default function TableauEffectif({ titre, modeActuel = true }) {
         <div className="flex gap-2">
           {modeActuel && (
             <button
-              onClick={() => ajouterSession(0)}
+              onClick={() => ajouterSession(specialites.length - 1)}
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
             >
               Ajouter une session
