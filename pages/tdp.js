@@ -12,7 +12,7 @@ export default function TDP() {
 
   const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
   const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
-  const [effectif, setEffectif] = useState([]); // [{ nom, totalGroupes, totalApprenants }]
+  const [effectif, setEffectif] = useState([]);
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
     besoinPratTotal: 0,
@@ -37,20 +37,20 @@ export default function TDP() {
   };
 
   const handleEffectifChange = (data) => {
-  const result = data.map((s) => {
-    const existant = s.existant || { groupes: 0, apprenants: 0 };
-    const ajout = s.ajout || { groupes: 0, apprenants: 0 };
+    const result = data.map((s) => {
+      const existant = s.existant || { groupes: 0, apprenants: 0 };
+      const ajout = s.ajout || { groupes: 0, apprenants: 0 };
 
-    return {
-      nom: s.nom,
-      totalGroupes:
-        parseInt(existant.groupes || 0) + parseInt(ajout.groupes || 0),
-      totalApprenants:
-        parseInt(existant.apprenants || 0) + parseInt(ajout.apprenants || 0),
-    };
-  });
-  setEffectif(result);
-};
+      return {
+        nom: s.nom,
+        totalGroupes:
+          parseInt(existant.groupes || 0) + parseInt(ajout.groupes || 0),
+        totalApprenants:
+          parseInt(existant.apprenants || 0) + parseInt(ajout.apprenants || 0),
+      };
+    });
+    setEffectif(result);
+  };
 
   const handleRepartitionChange = (repData) => {
     const besoinTheoTotal = repData.reduce((sum, r) => sum + r.besoinTheoTotal, 0);
