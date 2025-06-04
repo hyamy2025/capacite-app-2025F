@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import TableauSalle from '../components/TableauSalle';
+import TableauSalles from '../components/TableauSalles';
 import TableauEffectif from '../components/TableauEffectif';
 import TableauRepartition from '../components/TableauRepartition';
 import TableauResultats from '../components/TableauResultats';
@@ -84,12 +84,11 @@ export default function TDA() {
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Test de Dépassement Actuel
         </h1>
-
-        <TableauSalle
+        <TableauSalles
           titre="Salles Théoriques"
           onDataChange={handleTheoChange}
         />
-        <TableauSalle
+        <TableauSalles
           titre="Salles Pratiques"
           onDataChange={handlePratChange}
         />

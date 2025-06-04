@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import TableauSalle from '../components/TableauSalle';
+import TableauSalles from '../components/TableauSalles';
 import TableauEffectif from '../components/TableauEffectif';
 import TableauRepartition from '../components/TableauRepartition';
 import TableauResultats from '../components/TableauResultats';
@@ -84,11 +84,11 @@ export default function TDP() {
           Test de Dépassement Prévu
         </h1>
 
-        <TableauSalle
+        <TableauSalles
           titre="Salles Théoriques"
           onDataChange={handleTheoChange}
         />
-        <TableauSalle
+        <TableauSalles
           titre="Salles Pratiques"
           onDataChange={handlePratChange}
         />
