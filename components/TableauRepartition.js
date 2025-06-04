@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
 import {
   calculerBesoinHoraireParSpecialite,
+  moyenneColonne,
+  sommeColonne,
 } from '../utils/calculs';
 
 export default function TableauRepartition({ titre, effectifData, onDataChange }) {
   const [repartitions, setRepartitions] = useState([]);
 
   useEffect(() => {
-    if ((effectifData ?? []).length > 0) {
-      const updated = effectifData.map((spec) => ({
-        nom: spec.nom,
-        besoinTheoParGroupe: '',
-        besoinTheoTotal: 0,
-        besoinPratParGroupe: '',
-        besoinPratTotal: 0,
-      }));
-      setRepartitions(updated);
-    }
+    const updated = effectifData.map((spec) => ({
+      nom: spec.nom,
+      besoinTheoParGroupe: '',
+      besoinTheoTotal: 0,
+      besoinPratParGroupe: '',
+      besoinPratTotal: 0,
+    }));
+    setRepartitions(updated);
   }, [effectifData]);
 
   useEffect(() => {
     if (onDataChange) onDataChange(repartitions);
-  }, [repartitions, onDataChange]);
+  }, [repartitions, onDataChange]); // ✅ تم إصلاح التحذير هنا
 
   const handleChange = (index, type, value) => {
     const newReps = [...repartitions];
@@ -36,8 +36,6 @@ export default function TableauRepartition({ titre, effectifData, onDataChange }
     setRepartitions(newReps);
   };
 
-  if (!repartitions.length) return null;
-
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
@@ -47,9 +45,9 @@ export default function TableauRepartition({ titre, effectifData, onDataChange }
           <tr>
             <th className="border p-2">Spécialité</th>
             <th className="border p-2">Besoin Théorique<br />par Groupe</th>
-            <th className="border p-2">Total Théorique</th>
+            <th className="border p-2">Besoin Théorique<br />Total</th>
             <th className="border p-2">Besoin Pratique<br />par Groupe</th>
-            <th className="border p-2">Total Pratique</th>
+            <th className="border p-2">Besoin Pratique<br />Total</th>
           </tr>
         </thead>
         <tbody>
