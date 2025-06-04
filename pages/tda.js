@@ -119,7 +119,7 @@ export default function TDA() {
           onClick={() => router.push('/')}
           className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl"
         >
-          Retour à l'Accueil
+          Retour à l&apos;Accueil
         </button>
       </div>
     </div>
