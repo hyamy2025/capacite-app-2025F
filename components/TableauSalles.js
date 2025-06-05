@@ -6,7 +6,7 @@ export default function TableauSalles({ titre, onDataChange }) {
     { nom: '', surfaceP: '', heuresParJour: '', semaines: 56 }
   ]);
 
-  const [historique, setHistorique] = useState([]); // ✅ جديد
+  const [historique, setHistorique] = useState([]); // ✅ historique ajouté
 
   useEffect(() => {
     const updated = salles.map((salle) => {
@@ -28,14 +28,14 @@ export default function TableauSalles({ titre, onDataChange }) {
   }, [salles]);
 
   const handleChange = (index, field, value) => {
-    setHistorique([...historique, salles]); // ✅ حفظ الحالة قبل التعديل
+    setHistorique([...historique, salles]); // ✅ sauvegarde
     const updated = [...salles];
     updated[index][field] = value;
     setSalles(updated);
   };
 
   const ajouterSalle = () => {
-    setHistorique([...historique, salles]); // ✅ حفظ الحالة قبل الإضافة
+    setHistorique([...historique, salles]); // ✅ sauvegarde
     setSalles([
       ...salles,
       { nom: '', surfaceP: '', heuresParJour: '', semaines: 56 }
@@ -44,8 +44,8 @@ export default function TableauSalles({ titre, onDataChange }) {
 
   const annuler = () => {
     if (historique.length > 0) {
-      const precedente = historique[historique.length - 1];
-      setSalles(precedente);
+      const precedent = historique[historique.length - 1];
+      setSalles(precedent);
       setHistorique(historique.slice(0, -1));
     }
   };
