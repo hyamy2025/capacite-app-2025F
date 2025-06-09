@@ -14,6 +14,11 @@ export default function TableauSalles({ titre }) {
   ]);
   const [historique, setHistorique] = useState([]);
 
+  // توليد خيارات CNO من 1.0 إلى 3.0 بفارق 0.1
+  const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
+  // توليد خيارات الأسابيع من 1 إلى 100
+  const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+
   const handleChange = (index, field, value) => {
     const newSalles = [...salles];
     newSalles[index][field] = value;
@@ -84,26 +89,27 @@ export default function TableauSalles({ titre }) {
       <div style={{ marginBottom: 16, display: "flex", gap: "2rem" }}>
         <label>
           CNO:
-          <input
-            type="number"
-            step="0.1"
-            min={1}
-            max={3}
+          <select
             value={cno}
             onChange={(e) => updateCno(Number(e.target.value))}
-            style={{ marginLeft: 8, width: 60 }}
-          />
+            style={{ marginLeft: 8, width: 80 }}
+          >
+            {cnoOptions.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </label>
         <label>
           Semaines:
-          <input
-            type="number"
-            min={1}
-            max={100}
+          <select
             value={semaines}
             onChange={(e) => updateSemaines(Number(e.target.value))}
-            style={{ marginLeft: 8, width: 60 }}
-          />
+            style={{ marginLeft: 8, width: 80 }}
+          >
+            {semainesOptions.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </label>
         <button
           className="bg-blue-500 text-white rounded px-3 py-1 ml-4"
@@ -147,7 +153,7 @@ export default function TableauSalles({ titre }) {
         <tfoot>
           <tr className="bg-gray-100 font-bold">
             <td className="border p-2 text-center" colSpan={2}>
-              Somme / Moyenne
+              Moyenne / Somme
             </td>
             <td className="border p-2 text-center">{moyenneSurfaceP}</td>
             <td className="border p-2 text-center">{totalHeuresMax}</td>
