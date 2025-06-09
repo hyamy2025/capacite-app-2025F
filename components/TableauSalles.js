@@ -1,18 +1,13 @@
 import React, { useState } from "react";
+import { calculerSurfacePedagogique, calculerHeuresMax } from "../utils/calculs";
 
-function TableauSalles({ titre }) {
-  // الحالات الموحدة لكل جدول
-  const [cno, setCno] = useState(1);
-  const [semaines, setSemaines] = useState(16);
-
-  // جدول القاعات
+export default function TableauSalles({ titre }) {
+  const [cno, setCno] = useState(1.0);
+  const [semaines, setSemaines] = useState(30);
   const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: 16, surfaceP: 0, heuresMax: 0 },
+    { surface: '', cno: 1.0, semaines: 30, surfaceP: 0, heuresMax: 0 },
   ]);
   const [historique, setHistorique] = useState([]);
-
-  const calculerSurfacePedagogique = (surface, cno) => Math.round(surface * cno);
-  const calculerHeuresMax = (semaines) => semaines * 40;
 
   const handleChange = (index, field, value) => {
     const newSalles = [...salles];
@@ -103,13 +98,13 @@ function TableauSalles({ titre }) {
           className="bg-blue-500 text-white rounded px-3 py-1 ml-4"
           onClick={ajouterSalle}
         >
-          إضافة قاعة جديدة
+          Ajouter Salle
         </button>
         <button
           className="bg-gray-300 text-gray-700 rounded px-3 py-1 ml-2"
           onClick={annulerModification}
         >
-          تراجع
+          Annuler
         </button>
       </div>
       <table className="w-full table-auto border text-sm">
@@ -142,5 +137,3 @@ function TableauSalles({ titre }) {
     </div>
   );
 }
-
-export default TableauSalles;
