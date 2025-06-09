@@ -12,7 +12,6 @@ export default function TableauSalles({ titre }) {
   const [salles, setSalles] = useState([
     { surface: '', cno: 1.0, semaines: 16, surfaceP: 0, heuresMax: 0 },
   ]);
-  const [historique, setHistorique] = useState([]);
 
   // خيارات CNO و Semaines
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
@@ -30,7 +29,6 @@ export default function TableauSalles({ titre }) {
     if (field === 'surface' || field === 'semaines' || field === 'cno') {
       newSalles[index].heuresMax = calculerHeuresMax(semaines);
     }
-    setHistorique([...historique, salles]);
     setSalles(newSalles);
   };
 
@@ -57,7 +55,6 @@ export default function TableauSalles({ titre }) {
   };
 
   const ajouterSalle = () => {
-    setHistorique([...historique, salles]);
     setSalles([
       ...salles,
       {
@@ -70,11 +67,13 @@ export default function TableauSalles({ titre }) {
     ]);
   };
 
+  // حذف آخر جدول (أي صف)
   const annulerModification = () => {
-    if (historique.length > 0) {
-      const dernierEtat = historique[historique.length - 1];
-      setSalles(dernierEtat);
-      setHistorique(historique.slice(0, -1));
+    if (salles.length > 1) {
+      setSalles(salles.slice(0, -1));
+    } else {
+      // إذا كان هناك صف واحد، أفرغ بياناته فقط (اختياري)
+      setSalles([{ surface: '', cno: cno, semaines: semaines, surfaceP: 0, heuresMax: calculerHeuresMax(semaines) }]);
     }
   };
 
