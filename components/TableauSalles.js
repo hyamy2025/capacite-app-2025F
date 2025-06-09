@@ -1,141 +1,121 @@
-import React, { useState } from "react";
+import { useState } from 'react';
+import {
+  calculerSurfacePedagogique,
+  calculerHeuresMax,
+  moyenneColonne,
+  sommeColonne,
+} from '../utils/calculs';
 
-const TableauSalles = ({ type, salles, setSalles }) => {
-  const [cnoCommun, setCnoCommun] = useState("");
-  const [semainesCommun, setSemainesCommun] = useState("");
+export default function TableauSalles({ titre }) {
+  const [salles, setSalles] = useState([
+    { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
+  ]);
+  const [historique, setHistorique] = useState([]);
 
-  const ajouterSalle = () => {
-    const nouvelleSalle = {
-      nom: "",
-      surface: "",
-      cno: cnoCommun,
-      semaines: semainesCommun,
-      heures: 0,
-    };
-    setSalles([...salles, nouvelleSalle]);
+  const handleChange = (index, field, value) => {
+    const newSalles = [...salles];
+    newSalles[index][field] = field === 'cno' ? parseFloat(value) : value;
+    if (field === 'surface' || field === 'cno') {
+      newSalles[index].surfaceP = calculerSurfacePedagogique(
+        parseFloat(newSalles[index].surface || 0),
+        parseFloat(newSalles[index].cno || 1)
+      );
+    }
+    if (field === 'semaines') {
+      newSalles[index].heuresMax = calculerHeuresMax(parseInt(value || 0));
+    }
+    setHistorique([...historique, salles]);
+    setSalles(newSalles);
   };
 
-  const supprimerSalle = (index) => {
-    const nouvellesSalles = [...salles];
-    nouvellesSalles.splice(index, 1);
-    setSalles(nouvellesSalles);
+  const ajouterSalle = () => {
+    setHistorique([...historique, salles]);
+    setSalles([
+      ...salles,
+      { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
+    ]);
   };
 
   const annulerModification = () => {
-    if (salles.length > 1) {
-      setSalles(salles.slice(0, -1));
+    if (historique.length > 0) {
+      const dernierEtat = historique[historique.length - 1];
+      setSalles(dernierEtat);
+      setHistorique(historique.slice(0, -1));
     }
   };
 
-  const handleChange = (index, field, value) => {
-    const nouvellesSalles = [...salles];
-    nouvellesSalles[index][field] = value;
-
-    const surface = parseFloat(nouvellesSalles[index].surface) || 0;
-    const cno = parseFloat(nouvellesSalles[index].cno) || 0;
-    const semaines = parseFloat(nouvellesSalles[index].semaines) || 0;
-    nouvellesSalles[index].heures = surface * cno * semaines;
-
-    setSalles(nouvellesSalles);
-  };
-
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-semibold mb-2">
-        {type === "theorique" ? "Salles Théoriques" : "Salles Pratiques"}
-      </h2>
-
-      {/* Champs communs */}
-      <div className="flex gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium">CNO commun</label>
-          <select
-            value={cnoCommun}
-            onChange={(e) => setCnoCommun(e.target.value)}
-            className="border p-1 rounded"
-          >
-            <option value="">--</option>
-            <option value="0.5">0.5</option>
-            <option value="0.6">0.6</option>
-            <option value="0.7">0.7</option>
-            <option value="0.8">0.8</option>
-            <option value="0.9">0.9</option>
-            <option value="1">1</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Semaines commun</label>
-          <input
-            type="number"
-            value={semainesCommun}
-            onChange={(e) => setSemainesCommun(e.target.value)}
-            className="border p-1 rounded w-24"
-          />
-        </div>
-      </div>
-
-      {/* Tableau */}
-      <table className="min-w-full table-auto border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Nom</th>
-            <th className="border p-2">Surface pédagogique (m²)</th>
-            <th className="border p-2">Heures</th>
-            <th className="border p-2">Supprimer</th>
+    <div className="bg-white shadow rounded-2xl p-4 mb-8">
+      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
+      <table className="w-full table-auto border text-sm">
+        <thead className="bg-gray-200">
+          <tr>
+            <th className="border p-2">Code</th>
+            <th className="border p-2">Surface (m²)</th>
+            <th className="border p-2">CNO</th>
+            <th className="border p-2">Surface Pédagogique</th>
+            <th className="border p-2">Semaines</th>
+            <th className="border p-2">Heures Max</th>
           </tr>
         </thead>
         <tbody>
           {salles.map((salle, index) => (
             <tr key={index}>
-              <td className="border p-2">
-                <input
-                  type="text"
-                  value={salle.nom}
-                  onChange={(e) => handleChange(index, "nom", e.target.value)}
-                  className="w-full border p-1 rounded"
-                />
-              </td>
+              <td className="border p-2 text-center">{index + 1}</td>
               <td className="border p-2">
                 <input
                   type="number"
                   value={salle.surface}
-                  onChange={(e) =>
-                    handleChange(index, "surface", e.target.value)
-                  }
-                  className="w-full border p-1 rounded"
+                  onChange={(e) => handleChange(index, 'surface', e.target.value)}
+                  className="w-full p-1 border rounded"
                 />
               </td>
-              <td className="border p-2 text-center">{salle.heures}</td>
-              <td className="border p-2 text-center">
-                <button
-                  onClick={() => supprimerSalle(index)}
-                  className="text-red-600 hover:underline"
+              <td className="border p-2">
+                <select
+                  value={salle.cno}
+                  onChange={(e) => handleChange(index, 'cno', e.target.value)}
+                  className="w-full p-1 border rounded"
                 >
-                  Supprimer
-                </button>
+                  {Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1)).map((val) => (
+                    <option key={val} value={val}>{val}</option>
+                  ))}
+                </select>
               </td>
+              <td className="border p-2 text-center">{salle.surfaceP}</td>
+              <td className="border p-2">
+                <input
+                  type="number"
+                  value={salle.semaines}
+                  onChange={(e) => handleChange(index, 'semaines', e.target.value)}
+                  className="w-full p-1 border rounded"
+                />
+              </td>
+              <td className="border p-2 text-center">{salle.heuresMax}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Boutons */}
-      <div className="mt-4 flex gap-4">
-        <button
-          onClick={ajouterSalle}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Ajouter une salle
-        </button>
-        <button
-          onClick={annulerModification}
-          className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-        >
-          Annuler
-        </button>
+      <div className="flex flex-wrap justify-between items-center mt-4 gap-4">
+        <div className="text-sm text-gray-700">
+          <p><strong>Moyenne Surface Pédagogique:</strong> {moyenneColonne(salles.map(s => s.surfaceP))}</p>
+          <p><strong>Total Heures Max:</strong> {sommeColonne(salles.map(s => s.heuresMax))}</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={ajouterSalle}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Ajouter une salle
+          </button>
+          <button
+            onClick={annulerModification}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          >
+            Annuler
+          </button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default TableauSalles;
+}
