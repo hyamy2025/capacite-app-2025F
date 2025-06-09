@@ -3,6 +3,7 @@ import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
+import useSpecialties from "../components/useSpecialties"; // <-- أضف هذا
 
 export default function TDP() {
   const pdfRef = useRef();
@@ -10,6 +11,7 @@ export default function TDP() {
   const [pratData, setPratData] = useState({});
   const [effectif, setEffectif] = useState([]);
   const [repartition, setRepartition] = useState({});
+  const specialties = useSpecialties(); // <-- أضف هذا
 
   const handleTheoChange = (data) => setTheoData(data);
   const handlePratChange = (data) => setPratData(data);
@@ -56,7 +58,13 @@ export default function TDP() {
           <TableauSalles titre="Salles Théoriques" onDataChange={handleTheoChange} />
           <TableauSalles titre="Salles Pratiques" onDataChange={handlePratChange} />
         </div>
-        <TableauEffectif titre="Effectif Prévu" modeActuel={false} onDataChange={handleEffectifChange} data={effectif ?? []} />
+        <TableauEffectif
+          titre="Effectif Prévu"
+          specialties={specialties}
+          modeActuel={false}
+          onDataChange={handleEffectifChange}
+          data={effectif ?? []}
+        />
         <TableauRepartition titre="Répartition Prévue des heures" effectifData={effectif ?? []} onDataChange={handleRepartitionChange} />
         <TableauResultats titre="Résultat" data={resultatsData} />
       </div>

@@ -1,42 +1,60 @@
 import React, { useState } from "react";
-import { sommeColonne, moyenneColonne } from "../utils/calculs";
+import { sommeColonne } from "../utils/calculs";
 
-export default function TableauEffectif({ titre, modeActuel = true, onDataChange }) {
+export default function TableauEffectif({ titre, specialties = [] }) {
   const [effectifs, setEffectifs] = useState([
-    { specialite: "", groupes: 0, apprenants: 0 }
+    {
+      specialite: "",
+      groupes: 0,
+      apprenants: 0,
+      besoinTheo: "",
+      besoinPrat: ""
+    }
   ]);
 
-  // إضافة تخصص جديد
   const ajouterSpecialite = () => {
     setEffectifs([
       ...effectifs,
-      { specialite: "", groupes: 0, apprenants: 0 }
+      {
+        specialite: "",
+        groupes: 0,
+        apprenants: 0,
+        besoinTheo: "",
+        besoinPrat: ""
+      }
     ]);
   };
 
-  // حذف آخر تخصص
   const annuler = () => {
     if (effectifs.length > 1) {
       setEffectifs(effectifs.slice(0, -1));
     } else {
-      setEffectifs([{ specialite: "", groupes: 0, apprenants: 0 }]);
+      setEffectifs([
+        {
+          specialite: "",
+          groupes: 0,
+          apprenants: 0,
+          besoinTheo: "",
+          besoinPrat: ""
+        }
+      ]);
     }
   };
 
   const handleChange = (index, field, value) => {
     const newEffectifs = [...effectifs];
     if (field === "specialite") {
-      newEffectifs[index][field] = value;
+      // عند اختيار اختصاص، اجلب البيانات من specialties
+      const spec = specialties.find(s => s["Spécialité"] === value);
+      newEffectifs[index].specialite = value;
+      newEffectifs[index].besoinTheo = spec ? spec["Besoin Théorique par Groupe"] : "";
+      newEffectifs[index].besoinPrat = spec ? spec["Besoin Pratique par Groupe"] : "";
     } else {
       newEffectifs[index][field] = Number(value);
     }
     setEffectifs(newEffectifs);
-    if (onDataChange) {
-      onDataChange(newEffectifs);
-    }
   };
 
-  // حساب مجموع الأعمدة
   const totalGroupes = sommeColonne(effectifs.map(e => Number(e.groupes) || 0));
   const totalApprenants = sommeColonne(effectifs.map(e => Number(e.apprenants) || 0));
 
@@ -47,6 +65,8 @@ export default function TableauEffectif({ titre, modeActuel = true, onDataChange
         <thead className="bg-gray-200">
           <tr>
             <th className="border p-2">Spécialité</th>
+            <th className="border p-2">Besoin Théorique<br />par Groupe</th>
+            <th className="border p-2">Besoin Pratique<br />par Groupe</th>
             <th className="border p-2">Groupes</th>
             <th className="border p-2">Apprenants</th>
           </tr>
@@ -55,13 +75,21 @@ export default function TableauEffectif({ titre, modeActuel = true, onDataChange
           {effectifs.map((eff, idx) => (
             <tr key={idx}>
               <td className="border p-2">
-                <input
-                  type="text"
+                <select
                   value={eff.specialite}
                   onChange={e => handleChange(idx, "specialite", e.target.value)}
                   className="w-full p-1 border rounded"
-                />
+                >
+                  <option value="">-- Choisir --</option>
+                  {specialties.map(s => (
+                    <option key={s["Spécialité"]} value={s["Spécialité"]}>
+                      {s["Spécialité"]}
+                    </option>
+                  ))}
+                </select>
               </td>
+              <td className="border p-2 text-center">{eff.besoinTheo}</td>
+              <td className="border p-2 text-center">{eff.besoinPrat}</td>
               <td className="border p-2">
                 <input
                   type="number"
@@ -86,6 +114,8 @@ export default function TableauEffectif({ titre, modeActuel = true, onDataChange
         <tfoot>
           <tr className="bg-gray-100 font-bold">
             <td className="border p-2 text-center">Total</td>
+            <td className="border p-2"></td>
+            <td className="border p-2"></td>
             <td className="border p-2 text-center">{totalGroupes}</td>
             <td className="border p-2 text-center">{totalApprenants}</td>
           </tr>
