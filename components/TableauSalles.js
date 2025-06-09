@@ -18,7 +18,7 @@ export default function TableauSalles({ titre }) {
   ]);
 
   // قوائم الخيارات
-  const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
+  const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1.2));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
   const handleChange = (index, field, value) => {
