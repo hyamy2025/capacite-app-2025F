@@ -3,57 +3,18 @@ import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
-import { generatePDF } from "../components/generatePDF";
+import generatePDF from "../utils/generatePDF";
 
-export default function Tda() {
+export default function TDA() {
   const pdfRef = useRef();
-
-  const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
-  const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
+  const [theoData, setTheoData] = useState({});
+  const [pratData, setPratData] = useState({});
   const [effectif, setEffectif] = useState([]);
-  const [repartition, setRepartition] = useState({
-    besoinTheoTotal: 0,
-    besoinPratTotal: 0,
-    moyenneTheo: 0,
-    moyennePrat: 0,
-  });
+  const [repartition, setRepartition] = useState({});
 
-  const handleTheoChange = (salles) => {
-    const total = (salles ?? []).reduce((acc, s = {}) => acc + (s.heuresMax ?? 0), 0);
-    const moyenne =
-      salles?.length
-        ? salles.reduce((acc, s = {}) => acc + (s.surfaceP ?? 0), 0) / salles.length
-        : 0;
-    setTheoData({ heures: total, surfaceMoy: parseFloat(moyenne.toFixed(2)) });
-  };
-
-  const handlePratChange = (salles) => {
-    const total = (salles ?? []).reduce((acc, s = {}) => acc + (s.heuresMax ?? 0), 0);
-    const moyenne =
-      salles?.length
-        ? salles.reduce((acc, s = {}) => acc + (s.surfaceP ?? 0), 0) / salles.length
-        : 0;
-    setPratData({ heures: total, surfaceMoy: parseFloat(moyenne.toFixed(2)) });
-  };
-
-  const handleEffectifChange = (data) => {
-    const result = (data ?? []).map((s = {}) => {
-      const totalGroupes = (s.sessions ?? []).reduce(
-        (sum, sess = {}) => sum + (parseInt(sess.groupes ?? 0) || 0),
-        0
-      );
-      const totalApprenants = (s.sessions ?? []).reduce(
-        (sum, sess = {}) => sum + (parseInt(sess.apprenants ?? 0) || 0),
-        0
-      );
-      return {
-        nom: s.nom ?? "",
-        totalGroupes,
-        totalApprenants,
-      };
-    });
-    setEffectif(result);
-  };
+  const handleTheoChange = (data) => setTheoData(data);
+  const handlePratChange = (data) => setPratData(data);
+  const handleEffectifChange = (data) => setEffectif(data);
 
   const handleRepartitionChange = (repData) => {
     const besoinTheoTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinTheoTotal ?? 0), 0);

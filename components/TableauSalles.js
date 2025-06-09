@@ -1,121 +1,106 @@
-import { useState } from 'react';
-import {
-  calculerSurfacePedagogique,
-  calculerHeuresMax,
-  moyenneColonne,
-  sommeColonne,
-} from '../utils/calculs';
+import React, { useState } from "react";
 
-export default function TableauSalles({ titre }) {
-  const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
-  ]);
-  const [historique, setHistorique] = useState([]);
+function TableauSalles({ type }) {
+  // الحالات الموحدة لكل جدول
+  const [cno, setCno] = useState(1);
+  const [semaines, setSemaines] = useState(16);
 
-  const handleChange = (index, field, value) => {
-    const newSalles = [...salles];
-    newSalles[index][field] = field === 'cno' ? parseFloat(value) : value;
-    if (field === 'surface' || field === 'cno') {
-      newSalles[index].surfaceP = calculerSurfacePedagogique(
-        parseFloat(newSalles[index].surface || 0),
-        parseFloat(newSalles[index].cno || 1)
-      );
-    }
-    if (field === 'semaines') {
-      newSalles[index].heuresMax = calculerHeuresMax(parseInt(value || 0));
-    }
-    setHistorique([...historique, salles]);
-    setSalles(newSalles);
-  };
+  // جدول القاعات
+  const [salles, setSalles] = useState([]);
 
+  // إضافة قاعة جديدة
   const ajouterSalle = () => {
-    setHistorique([...historique, salles]);
     setSalles([
       ...salles,
-      { surface: '', cno: 1.0, semaines: '', surfaceP: 0, heuresMax: 0 },
+      {
+        nom: "",
+        // القيم الموحدة
+        cno,
+        semaines,
+        // يمكنك إضافة المزيد من الحقول هنا إذا لزم الأمر
+      },
     ]);
   };
 
-  const annulerModification = () => {
-    if (historique.length > 0) {
-      const dernierEtat = historique[historique.length - 1];
-      setSalles(dernierEtat);
-      setHistorique(historique.slice(0, -1));
-    }
+  // تحديث اسم القاعة فقط (لأن CNO و Semaines موحدين)
+  const handleChangeNom = (idx, value) => {
+    const arr = [...salles];
+    arr[idx].nom = value;
+    setSalles(arr);
+  };
+
+  // عند تغيير القيم الموحدة، يتم تحديثها لكل القاعات
+  const updateCno = (value) => {
+    setCno(value);
+    setSalles((prev) =>
+      prev.map((salle) => ({
+        ...salle,
+        cno: value,
+      }))
+    );
+  };
+
+  const updateSemaines = (value) => {
+    setSemaines(value);
+    setSalles((prev) =>
+      prev.map((salle) => ({
+        ...salle,
+        semaines: value,
+      }))
+    );
   };
 
   return (
-    <div className="bg-white shadow rounded-2xl p-4 mb-8">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
-      <table className="w-full table-auto border text-sm">
-        <thead className="bg-gray-200">
+    <div>
+      <h3>جدول القاعات {type === "theorique" ? "النظرية" : type === "pratique" ? "التطبيقية" : ""}</h3>
+      <div style={{ marginBottom: 16 }}>
+        <label>
+          CNO:
+          <input
+            type="number"
+            value={cno}
+            min={1}
+            onChange={(e) => updateCno(Number(e.target.value))}
+            style={{ marginLeft: 8, marginRight: 24 }}
+          />
+        </label>
+        <label>
+          Semaines:
+          <input
+            type="number"
+            value={semaines}
+            min={1}
+            onChange={(e) => updateSemaines(Number(e.target.value))}
+            style={{ marginLeft: 8 }}
+          />
+        </label>
+      </div>
+      <button onClick={ajouterSalle}>إضافة قاعة جديدة</button>
+      <table style={{ marginTop: 16, width: "100%", borderCollapse: "collapse" }}>
+        <thead>
           <tr>
-            <th className="border p-2">Code</th>
-            <th className="border p-2">Surface (m²)</th>
-            <th className="border p-2">CNO</th>
-            <th className="border p-2">Surface Pédagogique</th>
-            <th className="border p-2">Semaines</th>
-            <th className="border p-2">Heures Max</th>
+            <th style={{ border: "1px solid #ccc", padding: 8 }}>اسم القاعة</th>
+            {/* تم الاستغناء عن عمودي CNO و Semaines */}
           </tr>
         </thead>
         <tbody>
-          {salles.map((salle, index) => (
-            <tr key={index}>
-              <td className="border p-2 text-center">{index + 1}</td>
-              <td className="border p-2">
+          {salles.map((salle, idx) => (
+            <tr key={idx}>
+              <td style={{ border: "1px solid #ccc", padding: 8 }}>
                 <input
-                  type="number"
-                  value={salle.surface}
-                  onChange={(e) => handleChange(index, 'surface', e.target.value)}
-                  className="w-full p-1 border rounded"
+                  value={salle.nom}
+                  onChange={(e) => handleChangeNom(idx, e.target.value)}
+                  placeholder="اسم القاعة"
+                  style={{ width: "95%" }}
                 />
               </td>
-              <td className="border p-2">
-                <select
-                  value={salle.cno}
-                  onChange={(e) => handleChange(index, 'cno', e.target.value)}
-                  className="w-full p-1 border rounded"
-                >
-                  {Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1)).map((val) => (
-                    <option key={val} value={val}>{val}</option>
-                  ))}
-                </select>
-              </td>
-              <td className="border p-2 text-center">{salle.surfaceP}</td>
-              <td className="border p-2">
-                <input
-                  type="number"
-                  value={salle.semaines}
-                  onChange={(e) => handleChange(index, 'semaines', e.target.value)}
-                  className="w-full p-1 border rounded"
-                />
-              </td>
-              <td className="border p-2 text-center">{salle.heuresMax}</td>
+              {/* قيم CNO و Semaines موحدة ولا تظهر هنا */}
             </tr>
           ))}
         </tbody>
       </table>
-
-      <div className="flex flex-wrap justify-between items-center mt-4 gap-4">
-        <div className="text-sm text-gray-700">
-          <p><strong>Moyenne Surface Pédagogique:</strong> {moyenneColonne(salles.map(s => s.surfaceP))}</p>
-          <p><strong>Total Heures Max:</strong> {sommeColonne(salles.map(s => s.heuresMax))}</p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={ajouterSalle}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          >
-            Ajouter une salle
-          </button>
-          <button
-            onClick={annulerModification}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-          >
-            Annuler
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
+
+export default TableauSalles;
