@@ -3,7 +3,6 @@ import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
-import generatePDF from "../components/generatePDF";
 
 export default function TDP() {
   const pdfRef = useRef();
@@ -52,21 +51,14 @@ export default function TDP() {
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Test de Dépassement Prévu
         </h1>
-
-        <TableauSalles titre="Salles Théoriques" onDataChange={handleTheoChange} />
-        <TableauSalles titre="Salles Pratiques" onDataChange={handlePratChange} />
+        {/* جــدولان القاعات جنبًا إلى جنب */}
+        <div className="flex gap-6 flex-wrap mb-8">
+          <TableauSalles titre="Salles Théoriques" onDataChange={handleTheoChange} />
+          <TableauSalles titre="Salles Pratiques" onDataChange={handlePratChange} />
+        </div>
         <TableauEffectif titre="Effectif Prévu" modeActuel={false} onDataChange={handleEffectifChange} data={effectif ?? []} />
         <TableauRepartition titre="Répartition Prévue des heures" effectifData={effectif ?? []} onDataChange={handleRepartitionChange} />
         <TableauResultats titre="Résultat" data={resultatsData} />
-      </div>
-
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => generatePDF({ titre: 'Test de Dépassement Prévu', ref: pdfRef })}
-          className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl"
-        >
-          Télécharger Résultat
-        </button>
       </div>
     </div>
   );

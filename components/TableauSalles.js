@@ -14,9 +14,8 @@ export default function TableauSalles({ titre }) {
   ]);
   const [historique, setHistorique] = useState([]);
 
-  // توليد خيارات CNO من 1.0 إلى 3.0 بفارق 0.1
+  // خيارات CNO و Semaines
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
-  // توليد خيارات الأسابيع من 1 إلى 100
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
   const handleChange = (index, field, value) => {
@@ -84,7 +83,7 @@ export default function TableauSalles({ titre }) {
   const moyenneSurfaceP = moyenneColonne(salles.map(s => Number(s.surfaceP) || 0));
 
   return (
-    <div className="bg-white shadow rounded-2xl p-4 mb-8">
+    <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
       <div style={{ marginBottom: 16, display: "flex", gap: "2rem" }}>
         <label>
@@ -111,18 +110,6 @@ export default function TableauSalles({ titre }) {
             ))}
           </select>
         </label>
-        <button
-          className="bg-blue-500 text-white rounded px-3 py-1 ml-4"
-          onClick={ajouterSalle}
-        >
-          Ajouter salle
-        </button>
-        <button
-          className="bg-gray-300 text-gray-700 rounded px-3 py-1 ml-2"
-          onClick={annulerModification}
-        >
-          Annuler
-        </button>
       </div>
       <table className="w-full table-auto border text-sm">
         <thead className="bg-gray-200">
@@ -160,6 +147,20 @@ export default function TableauSalles({ titre }) {
           </tr>
         </tfoot>
       </table>
+      <div className="flex gap-4 mt-4 justify-center">
+        <button
+          className="bg-blue-500 text-white rounded px-3 py-1"
+          onClick={ajouterSalle}
+        >
+          Ajouter salle
+        </button>
+        <button
+          className="bg-gray-300 text-gray-700 rounded px-3 py-1"
+          onClick={annulerModification}
+        >
+          Annuler
+        </button>
+      </div>
     </div>
   );
 }
