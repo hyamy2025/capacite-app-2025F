@@ -8,12 +8,16 @@ import {
 
 export default function TableauSalles({ titre }) {
   const [cno, setCno] = useState(1);
-  const [semaines, setSemaines] = useState(16);
+  const [semaines, setSemaines] = useState(72);
+  // القيمة الافتراضية 56 مثل السابق
+  const [heures, setHeures] = useState(56);
+  const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54 ,56 ,58 ,60];
+
   const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: 16, surfaceP: 0, heuresMax: 0 },
+    { surface: '', cno: 1.2, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
   ]);
 
-  // خيارات CNO و Semaines
+  // قوائم الخيارات
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
@@ -26,9 +30,11 @@ export default function TableauSalles({ titre }) {
         parseFloat(cno)
       );
     }
-    if (field === 'surface' || field === 'semaines' || field === 'cno') {
-      newSalles[index].heuresMax = calculerHeuresMax(semaines);
-    }
+    // تحديث heuresMax
+    newSalles[index].heuresMax = calculerHeuresMax(
+      semaines,
+      heures
+    );
     setSalles(newSalles);
   };
 
@@ -49,7 +55,18 @@ export default function TableauSalles({ titre }) {
       prev.map((salle) => ({
         ...salle,
         semaines: value,
-        heuresMax: calculerHeuresMax(value),
+        heuresMax: calculerHeuresMax(value, heures),
+      }))
+    );
+  };
+
+  const updateHeures = (value) => {
+    setHeures(value);
+    setSalles((prev) =>
+      prev.map((salle) => ({
+        ...salle,
+        heures: value,
+        heuresMax: calculerHeuresMax(semaines, value),
       }))
     );
   };
@@ -61,19 +78,25 @@ export default function TableauSalles({ titre }) {
         surface: '',
         cno: cno,
         semaines: semaines,
+        heures: heures,
         surfaceP: 0,
-        heuresMax: calculerHeuresMax(semaines),
+        heuresMax: calculerHeuresMax(semaines, heures),
       },
     ]);
   };
 
-  // حذف آخر جدول (أي صف)
   const annulerModification = () => {
     if (salles.length > 1) {
       setSalles(salles.slice(0, -1));
     } else {
-      // إذا كان هناك صف واحد، أفرغ بياناته فقط (اختياري)
-      setSalles([{ surface: '', cno: cno, semaines: semaines, surfaceP: 0, heuresMax: calculerHeuresMax(semaines) }]);
+      setSalles([{
+        surface: '',
+        cno: cno,
+        semaines: semaines,
+        heures: heures,
+        surfaceP: 0,
+        heuresMax: calculerHeuresMax(semaines, heures)
+      }]);
     }
   };
 
@@ -109,6 +132,18 @@ export default function TableauSalles({ titre }) {
             ))}
           </select>
         </label>
+        <label>
+          Heures:
+          <select
+            value={heures}
+            onChange={(e) => updateHeures(Number(e.target.value))}
+            style={{ marginLeft: 8, width: 80 }}
+          >
+            {heuresOptions.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </label>
       </div>
       <table className="w-full table-auto border text-sm">
         <thead className="bg-gray-200">
@@ -139,7 +174,7 @@ export default function TableauSalles({ titre }) {
         <tfoot>
           <tr className="bg-gray-100 font-bold">
             <td className="border p-2 text-center" colSpan={2}>
-              Moyenne / Somme
+            Moyenne / Somme
             </td>
             <td className="border p-2 text-center">{moyenneSurfaceP}</td>
             <td className="border p-2 text-center">{totalHeuresMax}</td>

@@ -3,8 +3,9 @@ export function calculerSurfacePedagogique(surface, cno) {
   return result <= 26 ? parseFloat(result.toFixed(2)) : 26.0;
 }
 
-export function calculerHeuresMax(semaine) {
-  return 56 * semaine;
+// عدل الدالة لتقبل عدد الساعات في الأسبوع (heuresParSemaine) كوسيط إضافي
+export function calculerHeuresMax(semaine, heuresParSemaine = 56) {
+  return heuresParSemaine * semaine;
 }
 
 export function moyenneColonne(colonne) {
