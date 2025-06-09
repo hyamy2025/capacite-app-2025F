@@ -5,6 +5,7 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties"; // <-- أضف هذا
 
+
 export default function TDA() {
   const pdfRef = useRef();
   const [theoData, setTheoData] = useState({});
