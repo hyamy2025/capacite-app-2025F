@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { calculerSurfacePedagogique, calculerHeuresMax } from "../utils/calculs";
+import {
+  calculerSurfacePedagogique,
+  calculerHeuresMax,
+  moyenneColonne,
+  sommeColonne
+} from "../utils/calculs";
 
 export default function TableauSalles({ titre }) {
-  const [cno, setCno] = useState(1.0);
-  const [semaines, setSemaines] = useState(30);
+  const [cno, setCno] = useState(1);
+  const [semaines, setSemaines] = useState(16);
   const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: 30, surfaceP: 0, heuresMax: 0 },
+    { surface: '', cno: 1.0, semaines: 16, surfaceP: 0, heuresMax: 0 },
   ]);
   const [historique, setHistorique] = useState([]);
 
@@ -18,11 +23,13 @@ export default function TableauSalles({ titre }) {
         parseFloat(cno)
       );
     }
+    if (field === 'surface' || field === 'semaines' || field === 'cno') {
+      newSalles[index].heuresMax = calculerHeuresMax(semaines);
+    }
     setHistorique([...historique, salles]);
     setSalles(newSalles);
   };
 
-  // عند تغيير القيم الموحدة، يتم تحديثها لكل القاعات
   const updateCno = (value) => {
     setCno(value);
     setSalles((prev) =>
@@ -67,6 +74,10 @@ export default function TableauSalles({ titre }) {
     }
   };
 
+  // حساب المجاميع والمعدلات
+  const totalHeuresMax = sommeColonne(salles.map(s => Number(s.heuresMax) || 0));
+  const moyenneSurfaceP = moyenneColonne(salles.map(s => Number(s.surfaceP) || 0));
+
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
@@ -88,7 +99,7 @@ export default function TableauSalles({ titre }) {
           <input
             type="number"
             min={1}
-            max={52}
+            max={100}
             value={semaines}
             onChange={(e) => updateSemaines(Number(e.target.value))}
             style={{ marginLeft: 8, width: 60 }}
@@ -98,7 +109,7 @@ export default function TableauSalles({ titre }) {
           className="bg-blue-500 text-white rounded px-3 py-1 ml-4"
           onClick={ajouterSalle}
         >
-          Ajouter Salle
+          Ajouter salle
         </button>
         <button
           className="bg-gray-300 text-gray-700 rounded px-3 py-1 ml-2"
@@ -133,6 +144,15 @@ export default function TableauSalles({ titre }) {
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="bg-gray-100 font-bold">
+            <td className="border p-2 text-center" colSpan={2}>
+              Somme / Moyenne
+            </td>
+            <td className="border p-2 text-center">{moyenneSurfaceP}</td>
+            <td className="border p-2 text-center">{totalHeuresMax}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
