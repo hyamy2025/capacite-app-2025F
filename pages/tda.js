@@ -3,7 +3,7 @@ import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
-import generatePDF from "../utils/generatePDF";
+import generatePDF from "../components/generatePDF";
 
 export default function TDA() {
   const pdfRef = useRef();
