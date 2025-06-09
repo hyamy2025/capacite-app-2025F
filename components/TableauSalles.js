@@ -14,11 +14,11 @@ export default function TableauSalles({ titre }) {
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54 ,56 ,58 ,60];
 
   const [salles, setSalles] = useState([
-    { surface: '', cno: 1.2, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
+    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
   ]);
 
   // قوائم الخيارات
-  const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1.2));
+  const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
   const handleChange = (index, field, value) => {
