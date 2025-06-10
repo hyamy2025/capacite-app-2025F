@@ -22,6 +22,11 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
   // التغيير في الخانة
   const handleChange = (index, field, value) => {
     const newRows = [...data];
+    // التحقق من صحة القيمة قبل التحديث
+    if (field === "specialite" && !specialties.some(s => s["Spécialité"] === value)) {
+      console.error(`Invalid value selected for Spécialité: ${value}`);
+      return;
+    }
     newRows[index][field] = field === "specialite" ? value : Number(value);
     onDataChange(newRows);
   };
