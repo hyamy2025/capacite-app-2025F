@@ -1,7 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
+import { sommeColonne } from "../utils/calculs";
 
-export default function TableauEffectif({ titre, specialties = [], effectifs = [], setEffectifs }) {
-  // إضافة صف جديد
+export default function TableauEffectif({ titre, specialties = [] }) {
+  const [effectifs, setEffectifs] = useState([
+    {
+      specialite: "",
+      groupes: 0,
+      apprenants: 0,
+      besoinTheo: "",
+      besoinPrat: ""
+    }
+  ]);
+
   const ajouterSpecialite = () => {
     setEffectifs([
       ...effectifs,
@@ -9,11 +19,12 @@ export default function TableauEffectif({ titre, specialties = [], effectifs = [
         specialite: "",
         groupes: 0,
         apprenants: 0,
-      },
+        besoinTheo: "",
+        besoinPrat: ""
+      }
     ]);
   };
 
-  // حذف آخر صف (أو إعادة تعيين إذا كان صف واحد)
   const annuler = () => {
     if (effectifs.length > 1) {
       setEffectifs(effectifs.slice(0, -1));
@@ -23,25 +34,29 @@ export default function TableauEffectif({ titre, specialties = [], effectifs = [
           specialite: "",
           groupes: 0,
           apprenants: 0,
-        },
+          besoinTheo: "",
+          besoinPrat: ""
+        }
       ]);
     }
   };
 
-  // التعامل مع التغيير في أي حقل
   const handleChange = (index, field, value) => {
     const newEffectifs = [...effectifs];
     if (field === "specialite") {
+      // عند اختيار اختصاص، اجلب البيانات من specialties
+      const spec = specialties.find(s => s["Spécialité"] === value);
       newEffectifs[index].specialite = value;
+      newEffectifs[index].besoinTheo = spec ? spec["Besoin Théorique par Groupe"] : "";
+      newEffectifs[index].besoinPrat = spec ? spec["Besoin Pratique par Groupe"] : "";
     } else {
       newEffectifs[index][field] = Number(value);
     }
     setEffectifs(newEffectifs);
   };
 
-  // حساب الإجماليات مع معالجة القيم الافتراضية
-  const totalGroupes = (effectifs || []).reduce((acc, cur) => acc + (Number(cur.groupes) || 0), 0);
-  const totalApprenants = (effectifs || []).reduce((acc, cur) => acc + (Number(cur.apprenants) || 0), 0);
+  const totalGroupes = sommeColonne(effectifs.map(e => Number(e.groupes) || 0));
+  const totalApprenants = sommeColonne(effectifs.map(e => Number(e.apprenants) || 0));
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
@@ -50,12 +65,14 @@ export default function TableauEffectif({ titre, specialties = [], effectifs = [
         <thead className="bg-gray-200">
           <tr>
             <th className="border p-2">Spécialité</th>
+            <th className="border p-2">Besoin Théorique<br />par Groupe</th>
+            <th className="border p-2">Besoin Pratique<br />par Groupe</th>
             <th className="border p-2">Groupes</th>
             <th className="border p-2">Apprenants</th>
           </tr>
         </thead>
         <tbody>
-          {(effectifs || []).map((eff, idx) => (
+          {effectifs.map((eff, idx) => (
             <tr key={idx}>
               <td className="border p-2">
                 <select
@@ -65,12 +82,14 @@ export default function TableauEffectif({ titre, specialties = [], effectifs = [
                 >
                   <option value="">-- Choisir --</option>
                   {specialties.map(s => (
-                    <option key={s} value={s}>
-                      {s}
+                    <option key={s["Spécialité"]} value={s["Spécialité"]}>
+                      {s["Spécialité"]}
                     </option>
                   ))}
                 </select>
               </td>
+              <td className="border p-2 text-center">{eff.besoinTheo}</td>
+              <td className="border p-2 text-center">{eff.besoinPrat}</td>
               <td className="border p-2">
                 <input
                   type="number"
@@ -95,6 +114,8 @@ export default function TableauEffectif({ titre, specialties = [], effectifs = [
         <tfoot>
           <tr className="bg-gray-100 font-bold">
             <td className="border p-2 text-center">Total</td>
+            <td className="border p-2"></td>
+            <td className="border p-2"></td>
             <td className="border p-2 text-center">{totalGroupes}</td>
             <td className="border p-2 text-center">{totalApprenants}</td>
           </tr>
