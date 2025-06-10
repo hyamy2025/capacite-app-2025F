@@ -2,15 +2,21 @@ import React from "react";
 import { sommeColonne } from "../utils/calculs";
 
 export default function TableauEffectif({ titre, specialties = [], data, onDataChange }) {
-  // الإضافة: يضيف دومًا صف جديد
   const ajouterSpecialite = () => {
-    onDataChange([
-      ...data,
+    if (typeof onDataChange !== "function") {
+      console.error("onDataChange is not a function");
+      return;
+    }
+    const currentData = Array.isArray(data) ? data : [];
+    console.debug("Current data before adding:", currentData); // طباعة البيانات الحالية
+    const newData = [
+      ...currentData,
       { specialite: "", groupes: 0, apprenants: 0 }
-    ]);
+    ];
+    console.debug("Data after adding new row:", newData); // طباعة البيانات بعد التحديث
+    onDataChange(newData);
   };
 
-  // الحذف: لا يسمح بأن تصبح القائمة فارغة أبدًا
   const annuler = () => {
     if (data.length > 1) {
       onDataChange(data.slice(0, -1));
@@ -19,11 +25,9 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
     }
   };
 
-  // التغيير في الخانة
   const handleChange = (index, field, value) => {
     try {
       const newRows = [...data];
-      // التحقق من صحة القيمة قبل التحديث
       if (field === "specialite") {
         console.debug("Selected value:", value); // طباعة القيمة المحددة للتصحيح
         if (!specialties.some(s => s["Spécialité"] === value)) {
@@ -38,11 +42,9 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
     }
   };
 
-  // مجموع الأعمدة
   const totalGroupes = sommeColonne((data || []).map(e => Number(e.groupes) || 0));
   const totalApprenants = sommeColonne((data || []).map(e => Number(e.apprenants) || 0));
 
-  // دومًا يعرض صف واحد على الأقل
   const rows = data && data.length > 0 ? data : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
   return (
