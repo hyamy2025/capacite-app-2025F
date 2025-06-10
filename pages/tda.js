@@ -17,11 +17,14 @@ export default function TDA() {
 
   const handleTheoChange = (data) => setTheoData(data);
   const handlePratChange = (data) => setPratData(data);
+
+  // التحقق من صحة البيانات قبل التحديث
   const handleEffectifChange = (rows) => {
-    if (!rows || rows.length === 0) {
+    const validRows = rows.filter(row => row.specialite && row.groupes >= 0 && row.apprenants >= 0);
+    if (!validRows || validRows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
     } else {
-      setEffectif(rows);
+      setEffectif(validRows);
     }
   };
 
