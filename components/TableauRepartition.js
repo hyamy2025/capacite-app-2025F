@@ -28,8 +28,8 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
         <tbody>
           {rows.map((row, idx) => {
             const spec = findSpecialtyData(row.specialite);
-            const besoinTheoParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes, spec["Besoin Théorique par Groupe"]);
-            const besoinPratParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes, spec["Besoin Pratique par Groupe"]);
+            const besoinTheoParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes || 0, spec["Besoin Théorique par Groupe"] || 0);
+            const besoinPratParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes || 0, spec["Besoin Pratique par Groupe"] || 0);
 
             return (
               <tr key={idx}>

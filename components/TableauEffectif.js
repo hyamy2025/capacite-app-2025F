@@ -3,20 +3,15 @@ import { sommeColonne } from "../utils/calculs";
 
 export default function TableauEffectif({ titre, specialties = [], data, onDataChange }) {
   const ajouterSpecialite = () => {
-    if (typeof onDataChange !== "function") {
-      console.error("onDataChange is not a function");
-      return;
-    }
-    const currentData = Array.isArray(data) ? data : [];
-    console.debug("Current data before adding:", currentData); // طباعة البيانات الحالية
-    const newData = [
-      ...currentData,
-      { specialite: "", groupes: 0, apprenants: 0 }
-    ];
-    console.debug("Data after adding new row:", newData); // طباعة البيانات بعد التحديث
-    onDataChange(newData);
-  };
-
+  const currentData = Array.isArray(data) ? data : [];
+  const newData = [
+    ...currentData,
+    { specialite: "", groupes: 0, apprenants: 0 }
+  ];
+  console.debug("Data after adding new row:", newData);
+  onDataChange(newData);
+};
+    
   const annuler = () => {
     if (data.length > 1) {
       onDataChange(data.slice(0, -1));
