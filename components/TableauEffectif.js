@@ -1,6 +1,7 @@
 import React from "react";
 
-export default function TableauEffectif({ titre, specialties = [], effectifs, setEffectifs }) {
+export default function TableauEffectif({ titre, specialties = [], effectifs = [], setEffectifs }) {
+  // إضافة صف جديد
   const ajouterSpecialite = () => {
     setEffectifs([
       ...effectifs,
@@ -12,6 +13,7 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
     ]);
   };
 
+  // حذف آخر صف (أو إعادة تعيين إذا كان صف واحد)
   const annuler = () => {
     if (effectifs.length > 1) {
       setEffectifs(effectifs.slice(0, -1));
@@ -26,6 +28,7 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
     }
   };
 
+  // التعامل مع التغيير في أي حقل
   const handleChange = (index, field, value) => {
     const newEffectifs = [...effectifs];
     if (field === "specialite") {
@@ -36,8 +39,9 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
     setEffectifs(newEffectifs);
   };
 
-  const totalGroupes = effectifs.reduce((acc, cur) => acc + (Number(cur.groupes) || 0), 0);
-  const totalApprenants = effectifs.reduce((acc, cur) => acc + (Number(cur.apprenants) || 0), 0);
+  // حساب الإجماليات مع معالجة القيم الافتراضية
+  const totalGroupes = (effectifs || []).reduce((acc, cur) => acc + (Number(cur.groupes) || 0), 0);
+  const totalApprenants = (effectifs || []).reduce((acc, cur) => acc + (Number(cur.apprenants) || 0), 0);
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
@@ -51,7 +55,7 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
           </tr>
         </thead>
         <tbody>
-          {effectifs.map((eff, idx) => (
+          {(effectifs || []).map((eff, idx) => (
             <tr key={idx}>
               <td className="border p-2">
                 <select

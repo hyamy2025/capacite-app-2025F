@@ -1,10 +1,10 @@
 import React from "react";
 
-// دوال حسابية افتراضية - عدلها حسب الحاجة
+// دوال افتراضية لحساب الحاجة النظرية والتطبيقية لكل تخصص
 const calcBesoinTheo = apprenants => Math.ceil((apprenants || 0) / 20);
 const calcBesoinPrat = apprenants => Math.ceil((apprenants || 0) / 12);
 
-export default function TableauRepartition({ titre, effectifData }) {
+export default function TableauRepartition({ titre, effectifData = [] }) {
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
@@ -18,7 +18,7 @@ export default function TableauRepartition({ titre, effectifData }) {
           </tr>
         </thead>
         <tbody>
-          {effectifData
+          {(effectifData || [])
             .filter(row => row.specialite && row.apprenants)
             .map((row, idx) => (
               <tr key={idx}>
