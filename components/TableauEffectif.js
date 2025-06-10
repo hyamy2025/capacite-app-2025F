@@ -1,46 +1,37 @@
 import React from "react";
 import { sommeColonne } from "../utils/calculs";
 
-export default function TableauEffectif({ titre, specialties = [], effectifs, setEffectifs }) {
+export default function TableauEffectif({ titre, specialties = [], data, onDataChange }) {
+  // الإضافة: يضيف دومًا صف جديد
   const ajouterSpecialite = () => {
-    setEffectifs([
-      ...effectifs,
-      {
-        specialite: "",
-        groupes: 0,
-        apprenants: 0,
-      }
+    onDataChange([
+      ...data,
+      { specialite: "", groupes: 0, apprenants: 0 }
     ]);
   };
 
+  // الحذف: لا يسمح بأن تصبح القائمة فارغة أبدًا
   const annuler = () => {
-    if (effectifs.length > 1) {
-      setEffectifs(effectifs.slice(0, -1));
+    if (data.length > 1) {
+      onDataChange(data.slice(0, -1));
     } else {
-      setEffectifs([
-        {
-          specialite: "",
-          groupes: 0,
-          apprenants: 0,
-        }
-      ]);
+      onDataChange([{ specialite: "", groupes: 0, apprenants: 0 }]);
     }
   };
 
+  // التغيير في الخانة
   const handleChange = (index, field, value) => {
-    const newEffectifs = [...effectifs];
-    newEffectifs[index][field] = field === "specialite" ? value : Number(value);
-    setEffectifs(newEffectifs);
+    const newRows = [...data];
+    newRows[index][field] = field === "specialite" ? value : Number(value);
+    onDataChange(newRows);
   };
 
-  const totalGroupes = sommeColonne((effectifs || []).map(e => Number(e.groupes) || 0));
-  const totalApprenants = sommeColonne((effectifs || []).map(e => Number(e.apprenants) || 0));
+  // مجموع الأعمدة
+  const totalGroupes = sommeColonne((data || []).map(e => Number(e.groupes) || 0));
+  const totalApprenants = sommeColonne((data || []).map(e => Number(e.apprenants) || 0));
 
-  const rows = effectifs && effectifs.length > 0 ? effectifs : [{
-    specialite: "",
-    groupes: 0,
-    apprenants: 0
-  }];
+  // دومًا يعرض صف واحد على الأقل
+  const rows = data && data.length > 0 ? data : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">

@@ -1,15 +1,19 @@
 import React from "react";
 
-export default function TableauRepartition({ titre, effectifData = [], specialties = [] }) {
+export default function TableauRepartition({ titre, effectifData = [], specialties = [], onDataChange }) {
   // دالة لإيجاد بيانات التخصص في ملف الإكسل
   const findSpecialtyData = (specialite) => {
     return specialties.find(s => s["Spécialité"] === specialite) || {};
   };
 
-  // دائما نعرض سطر واحد على الأقل
+  // دائمًا يظهر صف واحد على الأقل مع الاسم إذا كان مختار
   const rows = effectifData && effectifData.length > 0
     ? effectifData.filter(row => !!row.specialite)
     : [{ specialite: "", groupes: 0, apprenants: 0 }];
+
+  // يمكنك هنا إضافة منطق onDataChange إذا كنت تحتاج لحسابات إضافية أو مزامنة
+  // مثلاً:
+  // useEffect(() => { onDataChange && onDataChange(...); }, [effectifData]);
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
