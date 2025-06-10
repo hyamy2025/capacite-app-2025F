@@ -1,6 +1,7 @@
 import React from "react";
+import { calculerBesoinParSpecialite } from "../utils/calculs";
 
-export default function TableauRepartition({ titre, effectifData = [], specialties = [], onDataChange }) {
+export default function TableauRepartition({ titre, effectifData = [], specialties = [] }) {
   // دالة لإيجاد بيانات التخصص في ملف الإكسل
   const findSpecialtyData = (specialite) => {
     return specialties.find(s => s["Spécialité"] === specialite) || {};
@@ -20,16 +21,23 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
             <th className="border p-2">Spécialité</th>
             <th className="border p-2">Besoin Théorique<br />par Groupe</th>
             <th className="border p-2">Besoin Pratique<br />par Groupe</th>
+            <th className="border p-2">Besoin Théorique<br />par Spécialité</th>
+            <th className="border p-2">Besoin Pratique<br />par Spécialité</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row, idx) => {
             const spec = findSpecialtyData(row.specialite);
+            const besoinTheoParSpecialite = calculerBesoinParSpecialite(row.groupes, spec["Besoin Théorique par Groupe"]);
+            const besoinPratParSpecialite = calculerBesoinParSpecialite(row.groupes, spec["Besoin Pratique par Groupe"]);
+
             return (
               <tr key={idx}>
                 <td className="border p-2">{row.specialite || ""}</td>
                 <td className="border p-2 text-center">{spec["Besoin Théorique par Groupe"] || ""}</td>
                 <td className="border p-2 text-center">{spec["Besoin Pratique par Groupe"] || ""}</td>
+                <td className="border p-2 text-center">{besoinTheoParSpecialite}</td>
+                <td className="border p-2 text-center">{besoinPratParSpecialite}</td>
               </tr>
             );
           })}
