@@ -12,6 +12,7 @@ export default function TDA() {
   const [effectif, setEffectif] = useState([
     { specialite: "", groupes: 0, apprenants: 0 }
   ]);
+  const [repartition, setRepartition] = useState({});
   const specialties = useSpecialties();
 
   const handleTheoChange = (data) => setTheoData(data);
@@ -22,6 +23,36 @@ export default function TDA() {
     } else {
       setEffectif(rows);
     }
+  };
+
+  const handleRepartitionChange = (repData) => {
+    const besoinTheoTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinTheoTotal ?? 0), 0);
+    const besoinPratTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinPratTotal ?? 0), 0);
+    const moyenneTheo =
+      repData?.length
+        ? repData.reduce((sum, r = {}) => sum + parseFloat(r.besoinTheoParGroupe ?? 0), 0) / repData.length
+        : 0;
+    const moyennePrat =
+      repData?.length
+        ? repData.reduce((sum, r = {}) => sum + parseFloat(r.besoinPratParGroupe ?? 0), 0) / repData.length
+        : 0;
+    setRepartition({
+      besoinTheoTotal,
+      besoinPratTotal,
+      moyenneTheo: parseFloat(moyenneTheo.toFixed(2)),
+      moyennePrat: parseFloat(moyennePrat.toFixed(2)),
+    });
+  };
+
+  const resultatsData = {
+    totalHeuresTheo: theoData.heures,
+    totalHeuresPrat: pratData.heures,
+    besoinTheoTotal: repartition.besoinTheoTotal,
+    besoinPratTotal: repartition.besoinPratTotal,
+    moyenneBesoinTheo: repartition.moyenneTheo,
+    moyenneBesoinPrat: repartition.moyennePrat,
+    moyenneSurfaceTheo: theoData.surfaceMoy,
+    moyenneSurfacePrat: pratData.surfaceMoy,
   };
 
   return (
@@ -45,8 +76,9 @@ export default function TDA() {
           titre="Répartition actuelle des heures"
           effectifData={effectif}
           specialties={specialties}
+          onDataChange={handleRepartitionChange}
         />
-        <TableauResultats titre="Résultat" />
+        <TableauResultats titre="Résultat" data={resultatsData} />
       </div>
     </div>
   );
