@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { sommeColonne } from "../utils/calculs";
 
 export default function TableauEffectif({ titre, specialties = [], effectifs, setEffectifs }) {
@@ -36,7 +36,6 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
   const totalGroupes = sommeColonne((effectifs || []).map(e => Number(e.groupes) || 0));
   const totalApprenants = sommeColonne((effectifs || []).map(e => Number(e.apprenants) || 0));
 
-  // دائما نعرض السطر الأول على الأقل
   const rows = effectifs && effectifs.length > 0 ? effectifs : [{
     specialite: "",
     groupes: 0,
@@ -55,7 +54,7 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
           </tr>
         </thead>
         <tbody>
-          {(rows).map((eff, idx) => (
+          {rows.map((eff, idx) => (
             <tr key={idx}>
               <td className="border p-2">
                 <select

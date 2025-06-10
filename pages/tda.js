@@ -3,19 +3,23 @@ import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
-import useSpecialties from "../components/useSpecialties"; // <-- أضف هذا
-
+import useSpecialties from "../components/useSpecialties"; // <-- استيراد التخصصات من hook
 
 export default function TDA() {
   const pdfRef = useRef();
   const [theoData, setTheoData] = useState({});
   const [pratData, setPratData] = useState({});
-  const [effectif, setEffectif] = useState([]);
+  // بداية: الحالة الموحدة للجدولين
+  const [effectif, setEffectif] = useState([
+    { specialite: "", groupes: 0, apprenants: 0 }
+  ]);
+  // نهاية
   const [repartition, setRepartition] = useState({});
-  const specialties = useSpecialties(); // <-- أضف هذا
+  const specialties = useSpecialties();
 
   const handleTheoChange = (data) => setTheoData(data);
   const handlePratChange = (data) => setPratData(data);
+  // تحديث الحالة الموحدة
   const handleEffectifChange = (data) => setEffectif(data);
 
   const handleRepartitionChange = (repData) => {
@@ -66,7 +70,12 @@ export default function TDA() {
           onDataChange={handleEffectifChange}
           data={effectif ?? []}
         />
-        <TableauRepartition titre="Répartition actuelle des heures" effectifData={effectif ?? []} onDataChange={handleRepartitionChange} />
+        <TableauRepartition
+          titre="Répartition actuelle des heures"
+          effectifData={effectif ?? []}
+          specialties={specialties}
+          onDataChange={handleRepartitionChange}
+        />
         <TableauResultats titre="Résultat" data={resultatsData} />
       </div>
     </div>
