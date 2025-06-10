@@ -11,10 +11,6 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
     ? effectifData.filter(row => !!row.specialite)
     : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
-  // يمكنك هنا إضافة منطق onDataChange إذا كنت تحتاج لحسابات إضافية أو مزامنة
-  // مثلاً:
-  // useEffect(() => { onDataChange && onDataChange(...); }, [effectifData]);
-
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>

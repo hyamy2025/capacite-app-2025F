@@ -9,7 +9,6 @@ export default function TDA() {
   const pdfRef = useRef();
   const [theoData, setTheoData] = useState({});
   const [pratData, setPratData] = useState({});
-  // يبدأ بسطر واحد فارغ دومًا
   const [effectif, setEffectif] = useState([
     { specialite: "", groupes: 0, apprenants: 0 }
   ]);
@@ -18,7 +17,6 @@ export default function TDA() {
 
   const handleTheoChange = (data) => setTheoData(data);
   const handlePratChange = (data) => setPratData(data);
-  // يمنع أن تصبح effectif مصفوفة فارغة إطلاقًا
   const handleEffectifChange = (rows) => {
     if (!rows || rows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
