@@ -36,6 +36,13 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
   const totalGroupes = sommeColonne((effectifs || []).map(e => Number(e.groupes) || 0));
   const totalApprenants = sommeColonne((effectifs || []).map(e => Number(e.apprenants) || 0));
 
+  // دائما نعرض السطر الأول على الأقل
+  const rows = effectifs && effectifs.length > 0 ? effectifs : [{
+    specialite: "",
+    groupes: 0,
+    apprenants: 0
+  }];
+
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
@@ -48,7 +55,7 @@ export default function TableauEffectif({ titre, specialties = [], effectifs, se
           </tr>
         </thead>
         <tbody>
-          {(effectifs || []).map((eff, idx) => (
+          {(rows).map((eff, idx) => (
             <tr key={idx}>
               <td className="border p-2">
                 <select
