@@ -2,14 +2,16 @@ import React from "react";
 import { calculerBesoinHoraireParSpecialite } from "../utils/calculs";
 
 export default function TableauRepartition({ titre, effectifData = [], specialties = [] }) {
-  // دالة لإيجاد بيانات التخصص في ملف الإكسل
   const findSpecialtyData = (specialite) => {
     return specialties.find(s => s["Spécialité"] === specialite) || {};
   };
 
-  // دائمًا يظهر صف واحد على الأقل مع الاسم إذا كان مختار
   const rows = effectifData && effectifData.length > 0
-    ? effectifData.filter(row => !!row.specialite)
+    ? effectifData.map(row => ({
+        ...row,
+        groupes: row.groupes || 0,
+        apprenants: row.apprenants || 0
+      }))
     : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
   return (

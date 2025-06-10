@@ -15,14 +15,14 @@ export function moyenneColonne(colonne) {
   return parseFloat((total / valides.length).toFixed(2));
 }
 
+export function calculerBesoinHoraireParSpecialite(besoinParGroupe, nbGroupes) {
+  return besoinParGroupe * nbGroupes;
+}
+
 export function sommeColonne(colonne) {
   return colonne
     .filter(val => typeof val === 'number' && !isNaN(val))
     .reduce((acc, curr) => acc + curr, 0);
-}
-
-export function calculerBesoinHoraireParSpecialite(besoinParGroupe, nbGroupes) {
-  return besoinParGroupe * nbGroupes;
 }
 
 export function calculerHeuresResultat(disponible, requis) {

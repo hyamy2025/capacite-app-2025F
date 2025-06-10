@@ -3,15 +3,19 @@ import { sommeColonne } from "../utils/calculs";
 
 export default function TableauEffectif({ titre, specialties = [], data, onDataChange }) {
   const ajouterSpecialite = () => {
-  const currentData = Array.isArray(data) ? data : [];
-  const newData = [
-    ...currentData,
-    { specialite: "", groupes: 0, apprenants: 0 }
-  ];
-  console.debug("Data after adding new row:", newData);
-  onDataChange(newData);
-};
-    
+    const currentData = Array.isArray(data) ? data : [];
+    const newData = [
+      ...currentData,
+      { specialite: "", groupes: 0, apprenants: 0 }
+    ];
+    console.debug("Data after adding new row:", newData);
+    if (onDataChange) {
+      onDataChange(newData);
+    } else {
+      console.error("onDataChange is not defined");
+    }
+  };
+
   const annuler = () => {
     if (data.length > 1) {
       onDataChange(data.slice(0, -1));
@@ -24,7 +28,7 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
     try {
       const newRows = [...data];
       if (field === "specialite") {
-        console.debug("Selected value:", value); // طباعة القيمة المحددة للتصحيح
+        console.debug("Selected value:", value);
         if (!specialties.some(s => s["Spécialité"] === value)) {
           throw new Error(`Invalid value selected for Spécialité: ${value}`);
         }
