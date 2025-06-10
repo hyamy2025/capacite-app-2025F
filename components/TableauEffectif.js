@@ -25,6 +25,7 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
       const newRows = [...data];
       // التحقق من صحة القيمة قبل التحديث
       if (field === "specialite") {
+        console.debug("Selected value:", value); // طباعة القيمة المحددة للتصحيح
         if (!specialties.some(s => s["Spécialité"] === value)) {
           throw new Error(`Invalid value selected for Spécialité: ${value}`);
         }
