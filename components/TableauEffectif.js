@@ -21,21 +21,9 @@ export default function TableauEffectif({ titre, specialties = [], data, onDataC
 
   // التغيير في الخانة
   const handleChange = (index, field, value) => {
-    try {
-      const newRows = [...data];
-      // التحقق من صحة القيمة قبل التحديث
-      if (field === "specialite") {
-        console.debug("Selected value:", value); // طباعة القيمة المحددة للتصحيح
-        if (!specialties.some(s => s["Spécialité"] === value)) {
-          throw new Error(`Invalid value selected for Spécialité: ${value}`);
-        }
-      }
-      newRows[index][field] = field === "specialite" ? value : Number(value);
-      onDataChange(newRows);
-    } catch (error) {
-      console.error(error.message);
-      alert("حدث خطأ أثناء تحديث البيانات. يُرجى التحقق من القيم المدخلة.");
-    }
+    const newRows = [...data];
+    newRows[index][field] = field === "specialite" ? value : Number(value);
+    onDataChange(newRows);
   };
 
   // مجموع الأعمدة
