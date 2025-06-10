@@ -1,5 +1,5 @@
 import React from "react";
-import { calculerBesoinParSpecialite } from "../utils/calculs";
+import { calculerBesoinHoraireParSpecialite } from "../utils/calculs";
 
 export default function TableauRepartition({ titre, effectifData = [], specialties = [] }) {
   // دالة لإيجاد بيانات التخصص في ملف الإكسل
@@ -28,8 +28,8 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
         <tbody>
           {rows.map((row, idx) => {
             const spec = findSpecialtyData(row.specialite);
-            const besoinTheoParSpecialite = calculerBesoinParSpecialite(row.groupes, spec["Besoin Théorique par Groupe"]);
-            const besoinPratParSpecialite = calculerBesoinParSpecialite(row.groupes, spec["Besoin Pratique par Groupe"]);
+            const besoinTheoParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes, spec["Besoin Théorique par Groupe"]);
+            const besoinPratParSpecialite = calculerBesoinHoraireParSpecialite(row.groupes, spec["Besoin Pratique par Groupe"]);
 
             return (
               <tr key={idx}>
