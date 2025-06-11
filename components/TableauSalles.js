@@ -6,7 +6,6 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-// الدالة الافتراضية لإنشاء صف جديد
 const defaultSalle = (cno, semaines, heures, maxApprenants) => ({
   surface: "",
   cno,
@@ -48,7 +47,6 @@ export default function TableauSalles({
     // eslint-disable-next-line
   }, [apprenants, cnos, semaines, heures]);
 
-  // تغيير حقل داخل صف
   const handleChange = (type, index, field, value) => {
     setSalles(prev => {
       const arr = prev[type].slice();
@@ -66,7 +64,6 @@ export default function TableauSalles({
     });
   };
 
-  // تحديث القيم العامة (تؤثر على كل صفوف الجدول فقط)
   const updateCno = (type, value) => {
     setCnos(prev => ({ ...prev, [type]: value }));
     setSalles(prev => {
@@ -105,7 +102,6 @@ export default function TableauSalles({
     });
   };
 
-  // تحديث apprenants (عدد المتعلمين الأقصى لـ Surface Pédagogique)
   const updateApprenants = (type, value) => {
     setApprenants(prev => ({ ...prev, [type]: value }));
     setSalles(prev => {
@@ -121,7 +117,6 @@ export default function TableauSalles({
     });
   };
 
-  // إضافة صف جديد بشكل مستقل لكل جدول
   const ajouterSalle = (type) => {
     setSalles(prev => ({
       ...prev,
@@ -132,7 +127,6 @@ export default function TableauSalles({
     }));
   };
 
-  // زر الإلغاء: إذا أكثر من صف يحذف الأخير، إذا صف واحد فقط يفرغه
   const annulerModification = (type) => {
     setSalles(prev => {
       const arr = prev[type];
@@ -162,10 +156,10 @@ export default function TableauSalles({
   return (
     <div className="flex gap-4 w-full">
       {salleTitles.map(({ key, label }) => {
-        // إذا لم يوجد صفوف (حالة نادرة بسبب useEffect) ضع صف افتراضي
         const sallesType = salles[key] && salles[key].length > 0
           ? salles[key]
           : [defaultSalle(cnos[key], semaines[key], heures[key], apprenants[key])];
+
         const totalHeuresMax = sommeColonne(sallesType.map(s => Number(s.heuresMax) || 0));
         const moyenneSurfaceP = moyenneColonne(sallesType.map(s => Number(s.surfaceP) || 0));
         return (
