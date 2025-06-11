@@ -3,18 +3,19 @@ import TableauSalles from "./TableauSalles";
 import TableauRepartition from "./TableauRepartition";
 import TableauResultats from "./TableauResultats";
 
+// specialties يجب أن تحتوي على Besoin TP Spécifique par Groupe
 const specialties = [
   { 
     "Spécialité": "Math", 
     "Besoin Théorique par Groupe": 10, 
     "Besoin Pratique par Groupe": 12,
-    "Besoin TP Spécifique par Groupe": 6 // أضف الحقل الجديد هنا
+    "Besoin TP Spécifique par Groupe": 6
   },
   { 
     "Spécialité": "Physique", 
     "Besoin Théorique par Groupe": 8, 
     "Besoin Pratique par Groupe": 14,
-    "Besoin TP Spécifique par Groupe": 7 // أضف الحقل الجديد هنا
+    "Besoin TP Spécifique par Groupe": 7
   },
 ];
 
