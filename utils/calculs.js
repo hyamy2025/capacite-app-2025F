@@ -15,8 +15,8 @@ export function moyenneColonne(colonne) {
   return parseFloat((total / valides.length).toFixed(2));
 }
 
-export function calculerBesoinHoraireParSpecialite(besoinParGroupe, nbGroupes) {
-  return besoinParGroupe * nbGroupes;
+export function calculerBesoinHoraireParSpecialite(nbGroupes, besoinParGroupe) {
+  return nbGroupes * besoinParGroupe;
 }
 
 export function sommeColonne(colonne) {
@@ -25,10 +25,23 @@ export function sommeColonne(colonne) {
     .reduce((acc, curr) => acc + curr, 0);
 }
 
+// حساب Heures restantes: somme heures max - somme besoin par spécialité
+export function calculerHeuresRestantes(sommeHeuresMax, sommeBesoinParSpecialite) {
+  return parseFloat((sommeHeuresMax - sommeBesoinParSpecialite).toFixed(2));
+}
+
+// حساب Apprenants possibles: (heures restantes / moyenne besoin par groupe) * moyenne surface pédagogique
+export function calculerApprenantsPossibles(heuresRestantes, moyenneBesoinParGroupe, moyenneSurfacePedagogique) {
+  if (moyenneBesoinParGroupe === 0) return 0;
+  return Math.round((heuresRestantes / moyenneBesoinParGroupe) * moyenneSurfacePedagogique);
+}
+
+// متروك لدالة الاستنتاج النهائية
 export function calculerHeuresResultat(disponible, requis) {
   return parseFloat((disponible - requis).toFixed(2));
 }
 
+// متروك لدالة الاستنتاج النهائية
 export function calculerApprenantsResultat(heuresRestantes, besoinMoyen, surfaceMoyenne) {
   if (besoinMoyen === 0) return 0;
   return Math.round((heuresRestantes / besoinMoyen) * surfaceMoyenne);
