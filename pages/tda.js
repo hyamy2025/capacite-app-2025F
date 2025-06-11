@@ -5,16 +5,23 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
-/**
- * ملاحظة هامة:
- * تم التأكد من تمرير القيم الافتراضية للمصفوفات والكائنات
- * وتم إصلاح أي احتمال لتمرير undefined للمكونات الداخلية.
- * كل مكون من TableauSalles وTableauRepartition يستقبل props بشكل صحيح.
- * إذا تم تمرير onDataChange، يجب أن يعيد المكون كائنًا بالخصائص الصحيحة (heures, surfaceMoy، ...إلخ).
- */
-
 export default function TDA() {
   const pdfRef = useRef();
+  // الحالة الخاصة بساعات القاعات النظرية
+  const [cnoTheo, setCnoTheo] = useState(1.0);
+  const [semainesTheo, setSemainesTheo] = useState(72);
+  const [heuresTheo, setHeuresTheo] = useState(56);
+  const [sallesTheo, setSallesTheo] = useState([
+    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
+  ]);
+  // الحالة الخاصة بساعات القاعات التطبيقية
+  const [cnoPrat, setCnoPrat] = useState(1.0);
+  const [semainesPrat, setSemainesPrat] = useState(72);
+  const [heuresPrat, setHeuresPrat] = useState(56);
+  const [sallesPrat, setSallesPrat] = useState([
+    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
+  ]);
+
   const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
   const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
   const [effectif, setEffectif] = useState([
@@ -28,21 +35,20 @@ export default function TDA() {
   });
   const specialties = useSpecialties();
 
+  // اجمع الساعات ومتوسط المساحة من جدول القاعات النظرية
   const handleTheoChange = (data) =>
     setTheoData({
       heures: data?.heures ?? 0,
       surfaceMoy: data?.surfaceMoy ?? 0,
     });
-
+  // اجمع الساعات ومتوسط المساحة من جدول القاعات التطبيقية
   const handlePratChange = (data) =>
     setPratData({
       heures: data?.heures ?? 0,
       surfaceMoy: data?.surfaceMoy ?? 0,
     });
 
-  // تحديث البيانات مع الاحتفاظ بجميع الصفوف، حتى الفارغة، حتى يعمل زر الإضافة والإلغاء
   const handleEffectifChange = (rows) => {
-    // rows قد تحتوي على صفوف فارغة عند الإضافة أو الإلغاء، يجب عدم تصفيتها هنا
     if (!rows || rows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
     } else {
@@ -51,8 +57,6 @@ export default function TDA() {
   };
 
   const handleRepartitionChange = (repData) => {
-    // repData: [{ besoinTheoTotal, besoinPratTotal, besoinTheoParGroupe, besoinPratParGroupe }]
-    // هذا التنسيق يجب أن يكون متوافقًا مع TableauRepartition
     const besoinTheoTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinTheoTotal ?? 0), 0);
     const besoinPratTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinPratTotal ?? 0), 0);
     const moyenneTheo =
@@ -89,8 +93,30 @@ export default function TDA() {
           Test de Dépassement Actuel
         </h1>
         <div className="flex gap-6 flex-wrap mb-8">
-          <TableauSalles titre="Salles Théoriques" onDataChange={handleTheoChange} />
-          <TableauSalles titre="Salles Pratiques" onDataChange={handlePratChange} />
+          <TableauSalles
+            titre="Salles Théoriques"
+            salles={sallesTheo}
+            setSalles={setSallesTheo}
+            cno={cnoTheo}
+            setCno={setCnoTheo}
+            semaines={semainesTheo}
+            setSemaines={setSemainesTheo}
+            heures={heuresTheo}
+            setHeures={setHeuresTheo}
+            onDataChange={handleTheoChange}
+          />
+          <TableauSalles
+            titre="Salles Pratiques"
+            salles={sallesPrat}
+            setSalles={setSallesPrat}
+            cno={cnoPrat}
+            setCno={setCnoPrat}
+            semaines={semainesPrat}
+            setSemaines={setSemainesPrat}
+            heures={heuresPrat}
+            setHeures={setHeuresPrat}
+            onDataChange={handlePratChange}
+          />
         </div>
         <TableauEffectif
           titre="Effectif Actuel"
