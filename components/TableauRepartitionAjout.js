@@ -15,6 +15,7 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
       }))
     : [{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }];
 
+  // Arrays for each type (including TP Spécifique)
   const besoinTheoParGroupeArr = rows.map(row => {
     const spec = findSpecialtyData(row.specialite);
     return Number(spec["Besoin Théorique par Groupe"]) || 0;
@@ -23,6 +24,11 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
     const spec = findSpecialtyData(row.specialite);
     return Number(spec["Besoin Pratique par Groupe"]) || 0;
   });
+  const besoinTpSpecParGroupeArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return Number(spec["Besoin TP Spécifique par Groupe"]) || 0;
+  });
+
   const besoinTheoParSpecArr = rows.map(row => {
     const spec = findSpecialtyData(row.specialite);
     return calculerBesoinHoraireParSpecialiteAjout(
@@ -39,15 +45,29 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
       spec["Besoin Pratique par Groupe"] || 0
     );
   });
+  const besoinTpSpecParSpecArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return calculerBesoinHoraireParSpecialiteAjout(
+      row.groupes || 0,
+      row.groupesAjout || 0,
+      spec["Besoin TP Spécifique par Groupe"] || 0
+    );
+  });
 
+  // Calculations
   const avgBesoinTheoParGroupe = besoinTheoParGroupeArr.length
     ? (besoinTheoParGroupeArr.reduce((a, b) => a + b, 0) / besoinTheoParGroupeArr.length).toFixed(2)
     : "0";
   const avgBesoinPratParGroupe = besoinPratParGroupeArr.length
     ? (besoinPratParGroupeArr.reduce((a, b) => a + b, 0) / besoinPratParGroupeArr.length).toFixed(2)
     : "0";
+  const avgBesoinTpSpecParGroupe = besoinTpSpecParGroupeArr.length
+    ? (besoinTpSpecParGroupeArr.reduce((a, b) => a + b, 0) / besoinTpSpecParGroupeArr.length).toFixed(2)
+    : "0";
+
   const sumBesoinTheoParSpec = besoinTheoParSpecArr.reduce((a, b) => a + b, 0);
   const sumBesoinPratParSpec = besoinPratParSpecArr.reduce((a, b) => a + b, 0);
+  const sumBesoinTpSpecParSpec = besoinTpSpecParSpecArr.reduce((a, b) => a + b, 0);
 
   // تحديث النتائج للأب عند أي تغيير
   useEffect(() => {
@@ -56,12 +76,18 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
         {
           besoinTheoTotal: sumBesoinTheoParSpec,
           besoinPratTotal: sumBesoinPratParSpec,
+          besoinTpSpecTotal: sumBesoinTpSpecParSpec,
           besoinTheoParGroupe: Number(avgBesoinTheoParGroupe),
           besoinPratParGroupe: Number(avgBesoinPratParGroupe),
+          besoinTpSpecParGroupe: Number(avgBesoinTpSpecParGroupe),
         }
       ]);
     }
-  }, [sumBesoinTheoParSpec, sumBesoinPratParSpec, avgBesoinTheoParGroupe, avgBesoinPratParGroupe, onDataChange]);
+  }, [
+    sumBesoinTheoParSpec, sumBesoinPratParSpec, sumBesoinTpSpecParSpec,
+    avgBesoinTheoParGroupe, avgBesoinPratParGroupe, avgBesoinTpSpecParGroupe,
+    onDataChange
+  ]);
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
@@ -72,8 +98,10 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
             <th className="border p-2">Spécialité</th>
             <th className="border p-2">Besoin Théorique<br />par Groupe</th>
             <th className="border p-2">Besoin Pratique<br />par Groupe</th>
+            <th className="border p-2">Besoin TP Spécifique<br />par Groupe</th>
             <th className="border p-2">Besoin Théorique<br />par Spécialité<br />(Existant+Ajout)</th>
             <th className="border p-2">Besoin Pratique<br />par Spécialité<br />(Existant+Ajout)</th>
+            <th className="border p-2">Besoin TP Spécifique<br />par Spécialité<br />(Existant+Ajout)</th>
           </tr>
         </thead>
         <tbody>
@@ -89,14 +117,21 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
               row.groupesAjout || 0,
               spec["Besoin Pratique par Groupe"] || 0
             );
+            const besoinTpSpecParSpecialite = calculerBesoinHoraireParSpecialiteAjout(
+              row.groupes || 0,
+              row.groupesAjout || 0,
+              spec["Besoin TP Spécifique par Groupe"] || 0
+            );
 
             return (
               <tr key={idx}>
                 <td className="border p-2">{row.specialite || ""}</td>
                 <td className="border p-2 text-center">{spec["Besoin Théorique par Groupe"] || ""}</td>
                 <td className="border p-2 text-center">{spec["Besoin Pratique par Groupe"] || ""}</td>
+                <td className="border p-2 text-center">{spec["Besoin TP Spécifique par Groupe"] || ""}</td>
                 <td className="border p-2 text-center">{besoinTheoParSpecialite}</td>
                 <td className="border p-2 text-center">{besoinPratParSpecialite}</td>
+                <td className="border p-2 text-center">{besoinTpSpecParSpecialite}</td>
               </tr>
             );
           })}
@@ -106,8 +141,10 @@ export default function TableauRepartitionAjout({ effectifData, specialties, onD
             <td className="border p-2 font-bold text-right"> Moyenne / Somme</td>
             <td className="border p-2 text-center font-bold">{avgBesoinTheoParGroupe}</td>
             <td className="border p-2 text-center font-bold">{avgBesoinPratParGroupe}</td>
+            <td className="border p-2 text-center font-bold">{avgBesoinTpSpecParGroupe}</td>
             <td className="border p-2 text-center font-bold">{sumBesoinTheoParSpec}</td>
             <td className="border p-2 text-center font-bold">{sumBesoinPratParSpec}</td>
+            <td className="border p-2 text-center font-bold">{sumBesoinTpSpecParSpec}</td>
           </tr>
         </tfoot>
       </table>
