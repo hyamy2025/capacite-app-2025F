@@ -34,7 +34,6 @@ export function sommeColonne(colonne) {
     .reduce((acc, curr) => acc + curr, 0);
 }
 
-// حساب Heures restantes: somme heures max - somme besoin par spécialité
 export function calculerHeuresRestantes(sommeHeuresMax, sommeBesoinParSpecialite) {
   const a = Number(sommeHeuresMax);
   const b = Number(sommeBesoinParSpecialite);
@@ -42,7 +41,6 @@ export function calculerHeuresRestantes(sommeHeuresMax, sommeBesoinParSpecialite
   return parseFloat((a - b).toFixed(2));
 }
 
-// حساب Apprenants possibles: (heures restantes / moyenne besoin par groupe) * moyenne surface pédagogique
 export function calculerApprenantsPossibles(heuresRestantes, moyenneBesoinParGroupe, moyenneSurfacePedagogique) {
   const h = Number(heuresRestantes);
   const m = Number(moyenneBesoinParGroupe);

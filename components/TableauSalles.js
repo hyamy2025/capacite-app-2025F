@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   calculerSurfacePedagogique,
   calculerHeuresMax,
@@ -6,18 +6,8 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-export default function TableauSalles({ titre }) {
-  const [cno, setCno] = useState(1);
-  const [semaines, setSemaines] = useState(72);
-  // القيمة الافتراضية 56 مثل السابق
-  const [heures, setHeures] = useState(56);
+export default function TableauSalles({ salles, setSalles, cno, setCno, semaines, setSemaines, heures, setHeures }) {
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54 ,56 ,58 ,60];
-
-  const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
-  ]);
-
-  // قوائم الخيارات
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
@@ -27,13 +17,13 @@ export default function TableauSalles({ titre }) {
     if (field === 'surface') {
       newSalles[index].surfaceP = calculerSurfacePedagogique(
         parseFloat(newSalles[index].surface || 0),
-        parseFloat(cno)
+        parseFloat(newSalles[index].cno)
       );
     }
     // تحديث heuresMax
     newSalles[index].heuresMax = calculerHeuresMax(
-      semaines,
-      heures
+      newSalles[index].semaines,
+      newSalles[index].heures
     );
     setSalles(newSalles);
   };
@@ -55,7 +45,7 @@ export default function TableauSalles({ titre }) {
       prev.map((salle) => ({
         ...salle,
         semaines: value,
-        heuresMax: calculerHeuresMax(value, heures),
+        heuresMax: calculerHeuresMax(value, salle.heures),
       }))
     );
   };
@@ -66,7 +56,7 @@ export default function TableauSalles({ titre }) {
       prev.map((salle) => ({
         ...salle,
         heures: value,
-        heuresMax: calculerHeuresMax(semaines, value),
+        heuresMax: calculerHeuresMax(salle.semaines, value),
       }))
     );
   };
@@ -100,13 +90,12 @@ export default function TableauSalles({ titre }) {
     }
   };
 
-  // حساب المجاميع والمعدلات
   const totalHeuresMax = sommeColonne(salles.map(s => Number(s.heuresMax) || 0));
   const moyenneSurfaceP = moyenneColonne(salles.map(s => Number(s.surfaceP) || 0));
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Salles</h2>
       <div style={{ marginBottom: 16, display: "flex", gap: "2rem" }}>
         <label>
           CNO:

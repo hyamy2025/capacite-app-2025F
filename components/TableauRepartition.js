@@ -1,20 +1,19 @@
 import React from "react";
 import { calculerBesoinHoraireParSpecialite } from "../utils/calculs";
 
-export default function TableauRepartition({ titre, effectifData = [], specialties = [] }) {
+export default function TableauRepartition({ effectifData, specialties, setEffectifData }) {
   const findSpecialtyData = (specialite) => {
     return specialties.find(s => s["Spécialité"] === specialite) || {};
   };
 
-  const rows = effectifData && effectifData.length > 0
+  const rows = effectifData.length > 0
     ? effectifData.map(row => ({
         ...row,
-        groupes: row.groupes || 0,
-        apprenants: row.apprenants || 0
+        groupes: Number(row.groupes) || 0,
+        apprenants: Number(row.apprenants) || 0
       }))
     : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
-  // استخراج القيم للأعمدة الأربعة المطلوبة لحساب المعدلات والمجاميع
   const besoinTheoParGroupeArr = rows.map(row => {
     const spec = findSpecialtyData(row.specialite);
     return Number(spec["Besoin Théorique par Groupe"]) || 0;
@@ -43,7 +42,7 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Répartition</h2>
       <table className="w-full table-auto border text-sm mb-4">
         <thead className="bg-gray-200">
           <tr>

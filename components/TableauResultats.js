@@ -4,7 +4,7 @@ import {
   determinerEtat,
 } from '../utils/calculs';
 
-export default function TableauResultats({ titre, data }) {
+export default function TableauResultats({ data }) {
   const {
     totalHeuresTheo,
     totalHeuresPrat,
@@ -16,7 +16,6 @@ export default function TableauResultats({ titre, data }) {
     moyenneSurfacePrat,
   } = data;
 
-  // حماية القيم المدخلة من undefined أو القيم غير الرقمية
   const heuresRestantesTheo = calculerHeuresRestantes(totalHeuresTheo, besoinTheoTotal);
   const heuresRestantesPrat = calculerHeuresRestantes(totalHeuresPrat, besoinPratTotal);
 
@@ -36,8 +35,7 @@ export default function TableauResultats({ titre, data }) {
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
-
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Résultats</h2>
       <table className="w-full table-auto border text-sm mb-4">
         <thead className="bg-gray-200">
           <tr>
