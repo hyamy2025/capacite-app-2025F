@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import TableauSalles from "../components/TableauSalles";
-import TableauEffectifAjout from "../components/TableauEffectifAjout"; // التغيير هنا
+import TableauEffectifAjout from "../components/TableauEffectifAjout";
 import TableauRepartitionAjout from "../components/TableauRepartitionAjout";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
@@ -73,6 +73,48 @@ export default function TDP() {
     moyenneSurfacePrat: pratData.surfaceMoy,
   };
 
+  // تمرير القاعات بالطريقة الجديدة الموحدة
+  const sallesObj = {
+    theorie: sallesTheo,
+    pratique: sallesPrat,
+    tpSpecifiques: [],
+  };
+  const setSallesObj = (newSalles) => {
+    setSallesTheo(newSalles.theorie || []);
+    setSallesPrat(newSalles.pratique || []);
+    // لا يوجد tpSpecifiques هنا
+  };
+
+  const cnos = {
+    theorie: cnoTheo,
+    pratique: cnoPrat,
+    tpSpecifiques: 1.0,
+  };
+  const setCnos = (newCnos) => {
+    setCnoTheo(newCnos.theorie ?? 1.0);
+    setCnoPrat(newCnos.pratique ?? 1.0);
+  };
+
+  const semaines = {
+    theorie: semainesTheo,
+    pratique: semainesPrat,
+    tpSpecifiques: 72,
+  };
+  const setSemainesAll = (newSemaines) => {
+    setSemainesTheo(newSemaines.theorie ?? 72);
+    setSemainesPrat(newSemaines.pratique ?? 72);
+  };
+
+  const heures = {
+    theorie: heuresTheo,
+    pratique: heuresPrat,
+    tpSpecifiques: 56,
+  };
+  const setHeuresAll = (newHeures) => {
+    setHeuresTheo(newHeures.theorie ?? 56);
+    setHeuresPrat(newHeures.pratique ?? 56);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div ref={pdfRef}>
@@ -81,28 +123,16 @@ export default function TDP() {
         </h1>
         <div className="flex gap-6 flex-wrap mb-8">
           <TableauSalles
-            titre="Salles Théoriques"
-            salles={sallesTheo}
-            setSalles={setSallesTheo}
-            cno={cnoTheo}
-            setCno={setCnoTheo}
-            semaines={semainesTheo}
-            setSemaines={setSemainesTheo}
-            heures={heuresTheo}
-            setHeures={setHeuresTheo}
+            salles={sallesObj}
+            setSalles={setSallesObj}
+            cnos={cnos}
+            setCnos={setCnos}
+            semaines={semaines}
+            setSemaines={setSemainesAll}
+            heures={heures}
+            setHeures={setHeuresAll}
+            // يمكنك الاحتفاظ بـ onDataChange للساعات النظرية والتطبيقية إن أردت
             onDataChange={handleTheoChange}
-          />
-          <TableauSalles
-            titre="Salles Pratiques"
-            salles={sallesPrat}
-            setSalles={setSallesPrat}
-            cno={cnoPrat}
-            setCno={setCnoPrat}
-            semaines={semainesPrat}
-            setSemaines={setSemainesPrat}
-            heures={heuresPrat}
-            setHeures={setHeuresPrat}
-            onDataChange={handlePratChange}
           />
         </div>
         <TableauEffectifAjout
