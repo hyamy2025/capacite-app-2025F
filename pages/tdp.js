@@ -25,7 +25,7 @@ export default function TDP() {
   const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
   const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
   const [effectif, setEffectif] = useState([
-    { specialite: "", groupes: 0, apprenants: 0 }
+    { specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }
   ]);
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
@@ -50,7 +50,7 @@ export default function TDP() {
 
   const handleEffectifChange = (rows) => {
     if (!rows || rows.length === 0) {
-      setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
+      setEffectif([{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }]);
     } else {
       setEffectif(rows);
     }
@@ -116,6 +116,7 @@ export default function TDP() {
           modeActuel={false}
           onDataChange={handleEffectifChange}
           data={effectif}
+          moyenneSurfaceTheo={theoData.surfaceMoy} // تمرير معدل Surface Pédagogique النظري
         />
         <TableauRepartition
           titre="Répartition Prévue des heures"
