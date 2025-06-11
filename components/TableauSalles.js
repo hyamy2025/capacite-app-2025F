@@ -31,14 +31,10 @@ export default function TableauSalles({
   heures,
   setHeures,
 }) {
-  // salles = { theorie: [...], pratique: [...], tpSpecifiques: [...] }
-  // cnos = { theorie: 1.0, pratique: 1.0, tpSpecifiques: 1.0 }
-  // semaines = { theorie: 72, pratique: 72, tpSpecifiques: 72 }
-  // heures = { theorie: 56, pratique: 56, tpSpecifiques: 56 }
-
+  // التعامل مع تغييرات الحقول
   const handleChange = (type, index, field, value) => {
     const newSalles = { ...salles };
-    newSalles[type] = [...newSalles[type]]; // لضمان immutability
+    newSalles[type] = [...newSalles[type]];
     newSalles[type][index][field] = value;
     if (field === "surface") {
       newSalles[type][index].surfaceP = calculerSurfacePedagogique(
@@ -53,6 +49,7 @@ export default function TableauSalles({
     setSalles(newSalles);
   };
 
+  // تغيير cno
   const updateCno = (type, value) => {
     const newCnos = { ...cnos, [type]: value };
     setCnos(newCnos);
@@ -67,6 +64,7 @@ export default function TableauSalles({
     });
   };
 
+  // تغيير عدد الأسابيع
   const updateSemaines = (type, value) => {
     const newSemaines = { ...semaines, [type]: value };
     setSemaines(newSemaines);
@@ -81,6 +79,7 @@ export default function TableauSalles({
     });
   };
 
+  // تغيير عدد الساعات
   const updateHeures = (type, value) => {
     const newHeures = { ...heures, [type]: value };
     setHeures(newHeures);
@@ -95,6 +94,7 @@ export default function TableauSalles({
     });
   };
 
+  // إضافة صف جديد
   const ajouterSalle = (type) => {
     setSalles((prev) => ({
       ...prev,
@@ -105,7 +105,7 @@ export default function TableauSalles({
     }));
   };
 
-  // إذا بقي صف واحد فقط، يتم تفريغ بياناته (إعادة تعيينه) وليس حذفه
+  // عند الضغط على "Annuler": إذا أكثر من صف يحذف الأخير، إذا صف واحد يفرغ بياناته فقط
   const annulerModification = (type) => {
     setSalles((prev) => {
       if (prev[type].length > 1) {
@@ -113,19 +113,21 @@ export default function TableauSalles({
           ...prev,
           [type]: prev[type].slice(0, -1),
         };
-      } else {
-        // صف واحد فقط: أفرغ بياناته
+      } else if (prev[type].length === 1) {
         return {
           ...prev,
           [type]: [
             defaultSalle(cnos[type], semaines[type], heures[type]),
           ],
         };
+      } else {
+        // لا توجد صفوف أصلاً (حالة نادرة)
+        return prev;
       }
     });
   };
 
-  // Options
+  // خيارات الاختيار
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -194,7 +196,7 @@ export default function TableauSalles({
                       <input
                         type="number"
                         value={salle.surface}
-                        onChange={(e) => handleChange(key, index, 'surface', e.target.value)}
+                        onChange={(e) => handleChange(key, index, "surface", e.target.value)}
                         className="w-full p-1 border rounded"
                       />
                     </td>
