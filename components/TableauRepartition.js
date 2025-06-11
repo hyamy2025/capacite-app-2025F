@@ -14,6 +14,34 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
       }))
     : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
+  // استخراج القيم للأعمدة الأربعة المطلوبة لحساب المعدلات والمجاميع
+  const besoinTheoParGroupeArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return Number(spec["Besoin Théorique par Groupe"]) || 0;
+  });
+  const besoinPratParGroupeArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return Number(spec["Besoin Pratique par Groupe"]) || 0;
+  });
+  const besoinTheoParSpecArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return calculerBesoinHoraireParSpecialite(row.groupes || 0, spec["Besoin Théorique par Groupe"] || 0);
+  });
+  const besoinPratParSpecArr = rows.map(row => {
+    const spec = findSpecialtyData(row.specialite);
+    return calculerBesoinHoraireParSpecialite(row.groupes || 0, spec["Besoin Pratique par Groupe"] || 0);
+  });
+
+  // حساب المعدلات والمجاميع حسب طلبك
+  const avgBesoinTheoParGroupe = besoinTheoParGroupeArr.length
+    ? (besoinTheoParGroupeArr.reduce((a, b) => a + b, 0) / besoinTheoParGroupeArr.length).toFixed(2)
+    : "0.00";
+  const avgBesoinPratParGroupe = besoinPratParGroupeArr.length
+    ? (besoinPratParGroupeArr.reduce((a, b) => a + b, 0) / besoinPratParGroupeArr.length).toFixed(2)
+    : "0.00";
+  const sumBesoinTheoParSpec = besoinTheoParSpecArr.reduce((a, b) => a + b, 0);
+  const sumBesoinPratParSpec = besoinPratParSpecArr.reduce((a, b) => a + b, 0);
+
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">
       <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
@@ -44,6 +72,15 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
             );
           })}
         </tbody>
+        <tfoot>
+          <tr>
+            <td className="border p-2 font-bold text-right"> Moyenne / Somme</td>
+            <td className="border p-2 text-center font-bold">{avgBesoinTheoParGroupe}</td>
+            <td className="border p-2 text-center font-bold">{avgBesoinPratParGroupe}</td>
+            <td className="border p-2 text-center font-bold">{sumBesoinTheoParSpec}</td>
+            <td className="border p-2 text-center font-bold">{sumBesoinPratParSpec}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
