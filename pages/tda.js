@@ -5,23 +5,44 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
+// يمكنك وضع هذه الدالة خارج المكون إذا كانت مستخدمة في أماكن أخرى
+const defaultSalle = (cno, semaines, heures) => ({
+  surface: '',
+  cno,
+  semaines,
+  heures,
+  surfaceP: 0,
+  heuresMax: 0,
+});
+
 export default function TDA() {
   const pdfRef = useRef();
-  // الحالة الخاصة بساعات القاعات النظرية
+
+  // القاعات النظرية
   const [cnoTheo, setCnoTheo] = useState(1.0);
   const [semainesTheo, setSemainesTheo] = useState(72);
   const [heuresTheo, setHeuresTheo] = useState(56);
   const [sallesTheo, setSallesTheo] = useState([
-    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
+    defaultSalle(1.0, 72, 56)
   ]);
-  // الحالة الخاصة بساعات القاعات التطبيقية
+
+  // القاعات التطبيقية
   const [cnoPrat, setCnoPrat] = useState(1.0);
   const [semainesPrat, setSemainesPrat] = useState(72);
   const [heuresPrat, setHeuresPrat] = useState(56);
   const [sallesPrat, setSallesPrat] = useState([
-    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
+    defaultSalle(1.0, 72, 56)
   ]);
 
+  // قاعات TP Spécifiques
+  const [cnoTPS, setCnoTPS] = useState(1.0);
+  const [semainesTPS, setSemainesTPS] = useState(72);
+  const [heuresTPS, setHeuresTPS] = useState(56);
+  const [sallesTPS, setSallesTPS] = useState([
+    defaultSalle(1.0, 72, 56)
+  ]);
+
+  // بيانات أخرى
   const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
   const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
   const [effectif, setEffectif] = useState([
@@ -35,13 +56,12 @@ export default function TDA() {
   });
   const specialties = useSpecialties();
 
-  // اجمع الساعات ومتوسط المساحة من جدول القاعات النظرية
+  // تجميع بيانات
   const handleTheoChange = (data) =>
     setTheoData({
       heures: data?.heures ?? 0,
       surfaceMoy: data?.surfaceMoy ?? 0,
     });
-  // اجمع الساعات ومتوسط المساحة من جدول القاعات التطبيقية
   const handlePratChange = (data) =>
     setPratData({
       heures: data?.heures ?? 0,
@@ -56,7 +76,6 @@ export default function TDA() {
     }
   };
 
-  // التقاط أول عنصر من مصفوفة بيانات التوزيع
   const handleRepartitionChange = (repData) => {
     const r = (Array.isArray(repData) && repData.length > 0) ? repData[0] : {};
     setRepartition({
@@ -82,42 +101,45 @@ export default function TDA() {
   const sallesObj = {
     theorie: sallesTheo,
     pratique: sallesPrat,
-    tpSpecifiques: [],
+    tpSpecifiques: sallesTPS,
   };
   const setSallesObj = (newSalles) => {
     setSallesTheo(newSalles.theorie || []);
     setSallesPrat(newSalles.pratique || []);
-    // لا يوجد tpSpecifiques هنا
+    setSallesTPS(newSalles.tpSpecifiques || []);
   };
 
   const cnos = {
     theorie: cnoTheo,
     pratique: cnoPrat,
-    tpSpecifiques: 1.0,
+    tpSpecifiques: cnoTPS,
   };
   const setCnos = (newCnos) => {
     setCnoTheo(newCnos.theorie ?? 1.0);
     setCnoPrat(newCnos.pratique ?? 1.0);
+    setCnoTPS(newCnos.tpSpecifiques ?? 1.0);
   };
 
   const semaines = {
     theorie: semainesTheo,
     pratique: semainesPrat,
-    tpSpecifiques: 72,
+    tpSpecifiques: semainesTPS,
   };
   const setSemainesAll = (newSemaines) => {
     setSemainesTheo(newSemaines.theorie ?? 72);
     setSemainesPrat(newSemaines.pratique ?? 72);
+    setSemainesTPS(newSemaines.tpSpecifiques ?? 72);
   };
 
   const heures = {
     theorie: heuresTheo,
     pratique: heuresPrat,
-    tpSpecifiques: 56,
+    tpSpecifiques: heuresTPS,
   };
   const setHeuresAll = (newHeures) => {
     setHeuresTheo(newHeures.theorie ?? 56);
     setHeuresPrat(newHeures.pratique ?? 56);
+    setHeuresTPS(newHeures.tpSpecifiques ?? 56);
   };
 
   return (
@@ -136,7 +158,6 @@ export default function TDA() {
             setSemaines={setSemainesAll}
             heures={heures}
             setHeures={setHeuresAll}
-            // يمكنك الاحتفاظ بـ onDataChange للساعات النظرية فقط إن أردت
             onDataChange={handleTheoChange}
           />
         </div>
