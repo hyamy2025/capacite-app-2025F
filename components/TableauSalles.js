@@ -6,12 +6,12 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-const defaultSalle = (cno, semaines, heures) => ({
+const defaultSalle = (cno, semaines, heures, maxApprenants = 26) => ({
   surface: "",
   cno,
   semaines,
   heures,
-  surfaceP: 0,
+  surfaceP: calculerSurfacePedagogique(0, cno, maxApprenants),
   heuresMax: calculerHeuresMax(semaines, heures),
 });
 
@@ -39,7 +39,7 @@ export default function TableauSalles({
     const newSalles = { ...salles };
     salleTitles.forEach(({ key }) => {
       if (!Array.isArray(newSalles[key]) || newSalles[key].length === 0) {
-        newSalles[key] = [defaultSalle(cnos[key], semaines[key], heures[key])];
+        newSalles[key] = [defaultSalle(cnos[key], semaines[key], heures[key], apprenants[key])];
         changed = true;
       }
     });
@@ -52,7 +52,6 @@ export default function TableauSalles({
     setSalles(prev => {
       const arr = prev[type].slice();
       arr[index] = { ...arr[index], [field]: value };
-      // surfaceP يجب أن تُحسب دائمًا مع apprenants[type] وليس فقط عند field === "surface"
       arr[index].surfaceP = calculerSurfacePedagogique(
         parseFloat(arr[index].surface || 0),
         parseFloat(arr[index].cno),
@@ -73,7 +72,11 @@ export default function TableauSalles({
       const arr = prev[type].map(salle => ({
         ...salle,
         cno: value,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value), apprenants[type])
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(value),
+          apprenants[type]
+        )
       }));
       return { ...prev, [type]: arr };
     });
@@ -107,7 +110,11 @@ export default function TableauSalles({
     setSalles(prev => {
       const arr = prev[type].map(salle => ({
         ...salle,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(salle.cno), value)
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(salle.cno),
+          value
+        )
       }));
       return { ...prev, [type]: arr };
     });
@@ -119,14 +126,7 @@ export default function TableauSalles({
       ...prev,
       [type]: [
         ...prev[type],
-        {
-          ...defaultSalle(cnos[type], semaines[type], heures[type]),
-          surfaceP: calculerSurfacePedagogique(
-            0, // surface starts empty
-            cnos[type],
-            apprenants[type]
-          )
-        },
+        defaultSalle(cnos[type], semaines[type], heures[type], apprenants[type])
       ],
     }));
   };
@@ -165,7 +165,7 @@ export default function TableauSalles({
         // إذا لم يوجد صفوف (حالة نادرة بسبب useEffect) ضع صف افتراضي
         const sallesType = salles[key] && salles[key].length > 0
           ? salles[key]
-          : [defaultSalle(cnos[key], semaines[key], heures[key])];
+          : [defaultSalle(cnos[key], semaines[key], heures[key], apprenants[key])];
         const totalHeuresMax = sommeColonne(sallesType.map(s => Number(s.heuresMax) || 0));
         const moyenneSurfaceP = moyenneColonne(sallesType.map(s => Number(s.surfaceP) || 0));
         return (

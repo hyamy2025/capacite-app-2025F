@@ -9,7 +9,7 @@ import useSpecialties from "../components/useSpecialties";
 const moyenne = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 const somme = arr => arr.reduce((a, b) => a + b, 0);
 
-const defaultSalle = (cno, semaines, heures) => ({
+const defaultSalle = (cno, semaines, heures, maxApprenants = 26) => ({
   surface: "",
   cno,
   semaines,
