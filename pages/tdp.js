@@ -1,20 +1,18 @@
 import { useRef, useState } from "react";
 import TableauSalles from "../components/TableauSalles";
-import TableauEffectif from "../components/TableauEffectif";
+import TableauEffectifAjout from "../components/TableauEffectifAjout"; // التغيير هنا
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
 export default function TDP() {
   const pdfRef = useRef();
-  // الحالة الخاصة بساعات القاعات النظرية
   const [cnoTheo, setCnoTheo] = useState(1.0);
   const [semainesTheo, setSemainesTheo] = useState(72);
   const [heuresTheo, setHeuresTheo] = useState(56);
   const [sallesTheo, setSallesTheo] = useState([
     { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
   ]);
-  // الحالة الخاصة بساعات القاعات التطبيقية
   const [cnoPrat, setCnoPrat] = useState(1.0);
   const [semainesPrat, setSemainesPrat] = useState(72);
   const [heuresPrat, setHeuresPrat] = useState(56);
@@ -35,13 +33,11 @@ export default function TDP() {
   });
   const specialties = useSpecialties();
 
-  // اجمع الساعات ومتوسط المساحة من جدول القاعات النظرية
   const handleTheoChange = (data) =>
     setTheoData({
       heures: data?.heures ?? 0,
       surfaceMoy: data?.surfaceMoy ?? 0,
     });
-  // اجمع الساعات ومتوسط المساحة من جدول القاعات التطبيقية
   const handlePratChange = (data) =>
     setPratData({
       heures: data?.heures ?? 0,
@@ -56,7 +52,6 @@ export default function TDP() {
     }
   };
 
-  // التقاط أول عنصر من مصفوفة بيانات التوزيع
   const handleRepartitionChange = (repData) => {
     const r = (Array.isArray(repData) && repData.length > 0) ? repData[0] : {};
     setRepartition({
@@ -110,13 +105,13 @@ export default function TDP() {
             onDataChange={handlePratChange}
           />
         </div>
-        <TableauEffectif
+        <TableauEffectifAjout
           titre="Effectif Prévu"
           specialties={specialties}
           modeActuel={false}
           onDataChange={handleEffectifChange}
           data={effectif}
-          moyenneSurfaceTheo={theoData.surfaceMoy} // تمرير معدل Surface Pédagogique النظري
+          moyenneSurfaceTheo={theoData.surfaceMoy}
         />
         <TableauRepartition
           titre="Répartition Prévue des heures"
