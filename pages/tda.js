@@ -57,26 +57,34 @@ export default function TDA() {
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
     besoinPratTotal: 0,
+    besoinTpSpecTotal: 0,
     moyenneTheo: 0,
     moyennePrat: 0,
+    moyenneTpSpec: 0,
   });
   const specialties = useSpecialties();
 
   // ملخصات القاعات (تحسب تلقائياً من state salles)
   const totalHeuresTheo = somme(salles.theorie.map(s => Number(s.heuresMax) || 0));
   const totalHeuresPrat = somme(salles.pratique.map(s => Number(s.heuresMax) || 0));
+  const totalHeuresTpSpec = somme(salles.tpSpecifiques.map(s => Number(s.heuresMax) || 0));
   const moyenneSurfaceTheo = moyenne(salles.theorie.map(s => Number(s.surfaceP) || 0));
   const moyenneSurfacePrat = moyenne(salles.pratique.map(s => Number(s.surfaceP) || 0));
+  const moyenneSurfaceTpSpec = moyenne(salles.tpSpecifiques.map(s => Number(s.surfaceP) || 0));
 
   const resultatsData = {
     totalHeuresTheo,
     totalHeuresPrat,
+    totalHeuresTpSpec,
     besoinTheoTotal: repartition.besoinTheoTotal,
     besoinPratTotal: repartition.besoinPratTotal,
+    besoinTpSpecTotal: repartition.besoinTpSpecTotal,
     moyenneBesoinTheo: repartition.moyenneTheo,
     moyenneBesoinPrat: repartition.moyennePrat,
+    moyenneBesoinTpSpec: repartition.moyenneTpSpec,
     moyenneSurfaceTheo,
     moyenneSurfacePrat,
+    moyenneSurfaceTpSpec,
   };
 
   // handlers
@@ -93,8 +101,10 @@ export default function TDA() {
     setRepartition({
       besoinTheoTotal: r.besoinTheoTotal ?? 0,
       besoinPratTotal: r.besoinPratTotal ?? 0,
+      besoinTpSpecTotal: r.besoinTpSpecTotal ?? 0,
       moyenneTheo: r.besoinTheoParGroupe ?? 0,
       moyennePrat: r.besoinPratParGroupe ?? 0,
+      moyenneTpSpec: r.moyenneTpSpecParGroupe ?? 0,
     });
   };
 
