@@ -1,22 +1,18 @@
 import React from "react";
 import { sommeColonne } from "../utils/calculs";
 
-export default function TableauEffectif({
-  titre,
-  specialties = [],
-  data,
-  onDataChange,
-  moyenneSurfaceTheo = 0
-}) {
-  // إضافة خانة Ajout لكل تخصص
+export default function TableauEffectif({ titre, specialties = [], data, onDataChange }) {
   const ajouterSpecialite = () => {
     const currentData = Array.isArray(data) ? data : [];
     const newData = [
       ...currentData,
-      { specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }
+      { specialite: "", groupes: 0, apprenants: 0 }
     ];
+    console.debug("Data after adding new row:", newData);
     if (onDataChange) {
       onDataChange(newData);
+    } else {
+      console.error("onDataChange is not defined");
     }
   };
 
@@ -24,50 +20,31 @@ export default function TableauEffectif({
     if (data.length > 1) {
       onDataChange(data.slice(0, -1));
     } else {
-      onDataChange([{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }]);
+      onDataChange([{ specialite: "", groupes: 0, apprenants: 0 }]);
     }
   };
 
   const handleChange = (index, field, value) => {
-    const newRows = [...data];
-    if (field === "specialite") {
-      newRows[index][field] = value;
-    } else {
-      newRows[index][field] = Number(value);
+    try {
+      const newRows = [...data];
+      if (field === "specialite") {
+        console.debug("Selected value:", value);
+        if (!specialties.some(s => s["Spécialité"] === value)) {
+          throw new Error(`Invalid value selected for Spécialité: ${value}`);
+        }
+      }
+      newRows[index][field] = field === "specialite" ? value : Number(value);
+      onDataChange(newRows);
+    } catch (error) {
+      console.error(error.message);
+      alert("حدث خطأ أثناء تحديث البيانات. يُرجى التحقق من القيم المدخلة.");
     }
-    // إذا كان التغيير في groupesAjout يجب تحديث apprenantsAjout تلقائياً
-    if (field === "groupesAjout") {
-      newRows[index].apprenantsAjout = Number(value) * (Number(moyenneSurfaceTheo) || 0);
-    }
-    onDataChange(
-      newRows.map(row => ({
-        ...row,
-        groupesAjout: Number(row.groupesAjout) || 0,
-        apprenantsAjout: Number(row.groupesAjout || 0) * (Number(moyenneSurfaceTheo) || 0)
-      }))
-    );
   };
 
-  // تجهيز بيانات الأعمدة
-  const rows = (data && data.length > 0
-    ? data
-    : [{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }]
-  ).map(row => ({
-    ...row,
-    groupes: Number(row.groupes) || 0,
-    groupesAjout: Number(row.groupesAjout) || 0,
-    apprenants: Number(row.apprenants) || 0,
-    apprenantsAjout: Number(row.groupesAjout || 0) * (Number(moyenneSurfaceTheo) || 0)
-  }));
+  const totalGroupes = sommeColonne((data || []).map(e => Number(e.groupes) || 0));
+  const totalApprenants = sommeColonne((data || []).map(e => Number(e.apprenants) || 0));
 
-  // جمع الأعمدة
-  const totalGroupes = sommeColonne(rows.map(e => e.groupes));
-  const totalGroupesAjout = sommeColonne(rows.map(e => e.groupesAjout));
-  const totalGroupesAll = totalGroupes + totalGroupesAjout;
-
-  const totalApprenants = sommeColonne(rows.map(e => e.apprenants));
-  const totalApprenantsAjout = sommeColonne(rows.map(e => e.apprenantsAjout));
-  const totalApprenantsAll = totalApprenants + totalApprenantsAjout;
+  const rows = data && data.length > 0 ? data : [{ specialite: "", groupes: 0, apprenants: 0 }];
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
@@ -75,15 +52,9 @@ export default function TableauEffectif({
       <table className="w-full table-auto border text-sm">
         <thead className="bg-gray-200">
           <tr>
-            <th className="border p-2 align-bottom" rowSpan={2}>Spécialité</th>
-            <th className="border p-2 text-center" colSpan={2}>Groupes</th>
-            <th className="border p-2 text-center" colSpan={2}>Apprenants</th>
-          </tr>
-          <tr>
-            <th className="border p-2 text-center">Existant</th>
-            <th className="border p-2 text-center">Ajout</th>
-            <th className="border p-2 text-center">Existant</th>
-            <th className="border p-2 text-center">Ajout</th>
+            <th className="border p-2">Spécialité</th>
+            <th className="border p-2">Groupes</th>
+            <th className="border p-2">Apprenants</th>
           </tr>
         </thead>
         <tbody>
@@ -116,23 +87,10 @@ export default function TableauEffectif({
                 <input
                   type="number"
                   min={0}
-                  value={eff.groupesAjout}
-                  onChange={e => handleChange(idx, "groupesAjout", e.target.value)}
-                  className="w-full p-1 border rounded"
-                />
-              </td>
-              <td className="border p-2">
-                <input
-                  type="number"
-                  min={0}
                   value={eff.apprenants}
                   onChange={e => handleChange(idx, "apprenants", e.target.value)}
                   className="w-full p-1 border rounded"
                 />
-              </td>
-              <td className="border p-2 bg-gray-50 text-center">
-                {/* Apprenants Ajout محسوبة تلقائيا */}
-                {eff.apprenantsAjout}
               </td>
             </tr>
           ))}
@@ -141,14 +99,7 @@ export default function TableauEffectif({
           <tr className="bg-gray-100 font-bold">
             <td className="border p-2 text-center">Total</td>
             <td className="border p-2 text-center">{totalGroupes}</td>
-            <td className="border p-2 text-center">{totalGroupesAjout}</td>
             <td className="border p-2 text-center">{totalApprenants}</td>
-            <td className="border p-2 text-center">{totalApprenantsAjout}</td>
-          </tr>
-          <tr className="bg-gray-200 font-bold">
-            <td className="border p-2 text-center">Total général</td>
-            <td className="border p-2 text-center" colSpan={2}>{totalGroupesAll}</td>
-            <td className="border p-2 text-center" colSpan={2}>{totalApprenantsAll}</td>
           </tr>
         </tfoot>
       </table>
