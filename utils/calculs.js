@@ -36,17 +36,6 @@ export function calculerApprenantsPossibles(heuresRestantes, moyenneBesoinParGro
   return Math.round((heuresRestantes / moyenneBesoinParGroupe) * moyenneSurfacePedagogique);
 }
 
-// متروك لدالة الاستنتاج النهائية
-export function calculerHeuresResultat(disponible, requis) {
-  return parseFloat((disponible - requis).toFixed(2));
-}
-
-// متروك لدالة الاستنتاج النهائية
-export function calculerApprenantsResultat(heuresRestantes, besoinMoyen, surfaceMoyenne) {
-  if (besoinMoyen === 0) return 0;
-  return Math.round((heuresRestantes / besoinMoyen) * surfaceMoyenne);
-}
-
 export function determinerEtat(heuresRestantes) {
   return heuresRestantes >= 0 ? 'Excédent' : 'Dépassement';
 }

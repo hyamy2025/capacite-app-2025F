@@ -1,6 +1,6 @@
 import {
-  calculerHeuresResultat,
-  calculerApprenantsResultat,
+  calculerHeuresRestantes,
+  calculerApprenantsPossibles,
   determinerEtat,
 } from '../utils/calculs';
 
@@ -16,14 +16,15 @@ export default function TableauResultats({ titre, data }) {
     moyenneSurfacePrat,
   } = data;
 
-  const heuresRestantesTheo = calculerHeuresResultat(totalHeuresTheo, besoinTheoTotal);
-  const heuresRestantesPrat = calculerHeuresResultat(totalHeuresPrat, besoinPratTotal);
+  // استخدام الدوال الجديدة
+  const heuresRestantesTheo = calculerHeuresRestantes(totalHeuresTheo, besoinTheoTotal);
+  const heuresRestantesPrat = calculerHeuresRestantes(totalHeuresPrat, besoinPratTotal);
 
-  const apprenantsPossiblesTheo = calculerApprenantsResultat(
+  const apprenantsPossiblesTheo = calculerApprenantsPossibles(
     heuresRestantesTheo, moyenneBesoinTheo, moyenneSurfaceTheo
   );
 
-  const apprenantsPossiblesPrat = calculerApprenantsResultat(
+  const apprenantsPossiblesPrat = calculerApprenantsPossibles(
     heuresRestantesPrat, moyenneBesoinPrat, moyenneSurfacePrat
   );
 
