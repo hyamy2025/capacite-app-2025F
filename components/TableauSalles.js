@@ -6,12 +6,12 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-const defaultSalle = (cno, semaines, heures) => ({
+const defaultSalle = (cno, semaines, heures, maxApprenants = 26) => ({
   surface: "",
   cno,
   semaines,
   heures,
-  surfaceP: 0,
+  surfaceP: calculerSurfacePedagogique(0, cno, maxApprenants),
   heuresMax: calculerHeuresMax(semaines, heures),
 });
 
@@ -30,6 +30,8 @@ export default function TableauSalles({
   setSemaines,
   heures,
   setHeures,
+  apprenants,
+  setApprenants
 }) {
   // تأكد عند أول تشغيل أن كل جدول فيه صف واحد على الأقل
   React.useEffect(() => {
@@ -37,7 +39,7 @@ export default function TableauSalles({
     const newSalles = { ...salles };
     salleTitles.forEach(({ key }) => {
       if (!Array.isArray(newSalles[key]) || newSalles[key].length === 0) {
-        newSalles[key] = [defaultSalle(cnos[key], semaines[key], heures[key])];
+        newSalles[key] = [defaultSalle(cnos[key], semaines[key], heures[key], apprenants[key])];
         changed = true;
       }
     });
@@ -50,12 +52,11 @@ export default function TableauSalles({
     setSalles(prev => {
       const arr = prev[type].slice();
       arr[index] = { ...arr[index], [field]: value };
-      if (field === "surface") {
-        arr[index].surfaceP = calculerSurfacePedagogique(
-          parseFloat(arr[index].surface || 0),
-          parseFloat(arr[index].cno)
-        );
-      }
+      arr[index].surfaceP = calculerSurfacePedagogique(
+        parseFloat(arr[index].surface || 0),
+        parseFloat(arr[index].cno),
+        apprenants[type]
+      );
       arr[index].heuresMax = calculerHeuresMax(
         arr[index].semaines,
         arr[index].heures
@@ -71,7 +72,11 @@ export default function TableauSalles({
       const arr = prev[type].map(salle => ({
         ...salle,
         cno: value,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value))
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(value),
+          apprenants[type]
+        )
       }));
       return { ...prev, [type]: arr };
     });
@@ -99,13 +104,29 @@ export default function TableauSalles({
     });
   };
 
+  // تحديث apprenants (عدد المتعلمين الأقصى لـ Surface Pédagogique)
+  const updateApprenants = (type, value) => {
+    setApprenants(prev => ({ ...prev, [type]: value }));
+    setSalles(prev => {
+      const arr = prev[type].map(salle => ({
+        ...salle,
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(salle.cno),
+          value
+        )
+      }));
+      return { ...prev, [type]: arr };
+    });
+  };
+
   // إضافة صف جديد بشكل مستقل لكل جدول
   const ajouterSalle = (type) => {
     setSalles(prev => ({
       ...prev,
       [type]: [
         ...prev[type],
-        defaultSalle(cnos[type], semaines[type], heures[type]),
+        defaultSalle(cnos[type], semaines[type], heures[type], apprenants[type])
       ],
     }));
   };
@@ -124,7 +145,7 @@ export default function TableauSalles({
             {
               ...arr[0],
               surface: "",
-              surfaceP: 0,
+              surfaceP: calculerSurfacePedagogique(0, arr[0].cno, apprenants[type]),
               heuresMax: calculerHeuresMax(arr[0].semaines, arr[0].heures)
             }
           ]
@@ -136,6 +157,7 @@ export default function TableauSalles({
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  const apprenantsOptions = Array.from({ length: 21 }, (_, i) => 10 + i); // 10 إلى 30
 
   return (
     <div className="flex gap-4 w-full">
@@ -143,7 +165,7 @@ export default function TableauSalles({
         // إذا لم يوجد صفوف (حالة نادرة بسبب useEffect) ضع صف افتراضي
         const sallesType = salles[key] && salles[key].length > 0
           ? salles[key]
-          : [defaultSalle(cnos[key], semaines[key], heures[key])];
+          : [defaultSalle(cnos[key], semaines[key], heures[key], apprenants[key])];
         const totalHeuresMax = sommeColonne(sallesType.map(s => Number(s.heuresMax) || 0));
         const moyenneSurfaceP = moyenneColonne(sallesType.map(s => Number(s.surfaceP) || 0));
         return (
@@ -182,6 +204,18 @@ export default function TableauSalles({
                   style={{ marginLeft: 8, width: 80 }}
                 >
                   {heuresOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Apprenants:
+                <select
+                  value={apprenants[key]}
+                  onChange={e => updateApprenants(key, Number(e.target.value))}
+                  style={{ marginLeft: 8, width: 80 }}
+                >
+                  {apprenantsOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
