@@ -18,13 +18,13 @@ export default function TDP() {
   const handleTheoChange = (data) => setTheoData(data);
   const handlePratChange = (data) => setPratData(data);
 
-  // التحقق من صحة البيانات قبل التحديث
+  // تحديث البيانات مع الاحتفاظ بجميع الصفوف، حتى الفارغة، حتى يعمل زر الإضافة والإلغاء
   const handleEffectifChange = (rows) => {
-    const validRows = rows.filter(row => row.specialite && row.groupes >= 0 && row.apprenants >= 0);
-    if (!validRows || validRows.length === 0) {
+    // rows قد تحتوي على صفوف فارغة عند الإضافة أو الإلغاء، يجب عدم تصفيتها هنا
+    if (!rows || rows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
     } else {
-      setEffectif(validRows);
+      setEffectif(rows);
     }
   };
 
