@@ -5,6 +5,10 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
+// دوال مساعدة مباشرة
+const moyenne = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+const somme = arr => arr.reduce((a, b) => a + b, 0);
+
 const defaultSalle = (cno, semaines, heures) => ({
   surface: "",
   cno,
@@ -40,8 +44,7 @@ export default function TDA() {
     tpSpecifiques: 56,
   });
 
-  const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
-  const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
+  // Effectif, Repartition state
   const [effectif, setEffectif] = useState([
     { specialite: "", groupes: 0, apprenants: 0 }
   ]);
@@ -53,19 +56,24 @@ export default function TDA() {
   });
   const specialties = useSpecialties();
 
-  // استجابة تغيير القاعات النظرية
-  const handleTheoChange = (data) =>
-    setTheoData({
-      heures: data?.heures ?? 0,
-      surfaceMoy: data?.surfaceMoy ?? 0,
-    });
-  // استجابة تغيير القاعات التطبيقية (يمكنك ربطها إذا أردت)
-  const handlePratChange = (data) =>
-    setPratData({
-      heures: data?.heures ?? 0,
-      surfaceMoy: data?.surfaceMoy ?? 0,
-    });
+  // ملخصات القاعات (تحسب تلقائياً من state salles)
+  const totalHeuresTheo = somme(salles.theorie.map(s => Number(s.heuresMax) || 0));
+  const totalHeuresPrat = somme(salles.pratique.map(s => Number(s.heuresMax) || 0));
+  const moyenneSurfaceTheo = moyenne(salles.theorie.map(s => Number(s.surfaceP) || 0));
+  const moyenneSurfacePrat = moyenne(salles.pratique.map(s => Number(s.surfaceP) || 0));
 
+  const resultatsData = {
+    totalHeuresTheo,
+    totalHeuresPrat,
+    besoinTheoTotal: repartition.besoinTheoTotal,
+    besoinPratTotal: repartition.besoinPratTotal,
+    moyenneBesoinTheo: repartition.moyenneTheo,
+    moyenneBesoinPrat: repartition.moyennePrat,
+    moyenneSurfaceTheo,
+    moyenneSurfacePrat,
+  };
+
+  // handlers
   const handleEffectifChange = (rows) => {
     if (!rows || rows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
@@ -84,17 +92,6 @@ export default function TDA() {
     });
   };
 
-  const resultatsData = {
-    totalHeuresTheo: theoData.heures,
-    totalHeuresPrat: pratData.heures,
-    besoinTheoTotal: repartition.besoinTheoTotal,
-    besoinPratTotal: repartition.besoinPratTotal,
-    moyenneBesoinTheo: repartition.moyenneTheo,
-    moyenneBesoinPrat: repartition.moyennePrat,
-    moyenneSurfaceTheo: theoData.surfaceMoy,
-    moyenneSurfacePrat: pratData.surfaceMoy,
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div ref={pdfRef}>
@@ -111,7 +108,6 @@ export default function TDA() {
             setSemaines={setSemaines}
             heures={heures}
             setHeures={setHeures}
-            onDataChange={handleTheoChange}
           />
         </div>
         <TableauEffectif
@@ -120,14 +116,16 @@ export default function TDA() {
           modeActuel={true}
           onDataChange={handleEffectifChange}
           data={effectif}
+          salles={salles}
         />
         <TableauRepartition
           titre="Répartition actuelle des heures"
           effectifData={effectif}
           specialties={specialties}
           onDataChange={handleRepartitionChange}
+          salles={salles}
         />
-        <TableauResultats titre="Résultat" data={resultatsData} />
+        <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
       </div>
     </div>
   );
