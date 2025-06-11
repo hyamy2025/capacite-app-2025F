@@ -6,6 +6,7 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
+// الدالة التي تعيد صف افتراضي
 const defaultSalle = (cno, semaines, heures) => ({
   surface: "",
   cno,
@@ -31,72 +32,84 @@ export default function TableauSalles({
   heures,
   setHeures,
 }) {
-  // التعامل مع تغييرات الحقول
-  const handleChange = (type, index, field, value) => {
+  // تأكيد وجود صف واحد على الأقل في كل جدول عند بداية التشغيل
+  React.useEffect(() => {
+    let changed = false;
     const newSalles = { ...salles };
-    newSalles[type] = [...newSalles[type]];
-    newSalles[type][index][field] = value;
-    if (field === "surface") {
-      newSalles[type][index].surfaceP = calculerSurfacePedagogique(
-        parseFloat(newSalles[type][index].surface || 0),
-        parseFloat(newSalles[type][index].cno)
-      );
-    }
-    newSalles[type][index].heuresMax = calculerHeuresMax(
-      newSalles[type][index].semaines,
-      newSalles[type][index].heures
-    );
-    setSalles(newSalles);
-  };
+    salleTitles.forEach(({ key }) => {
+      if (!Array.isArray(newSalles[key]) || newSalles[key].length === 0) {
+        newSalles[key] = [defaultSalle(cnos[key], semaines[key], heures[key])];
+        changed = true;
+      }
+    });
+    if (changed) setSalles(newSalles);
+    // eslint-disable-next-line
+  }, []);
 
-  // تغيير cno
-  const updateCno = (type, value) => {
-    const newCnos = { ...cnos, [type]: value };
-    setCnos(newCnos);
-    setSalles((prev) => {
-      const ns = { ...prev };
-      ns[type] = ns[type].map((salle) => ({
-        ...salle,
-        cno: value,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value)),
-      }));
-      return ns;
+  // تغيير قيمة حقل في صف معين
+  const handleChange = (type, index, field, value) => {
+    setSalles(prev => {
+      const arr = prev[type].slice();
+      arr[index] = { ...arr[index], [field]: value };
+      if (field === "surface") {
+        arr[index].surfaceP = calculerSurfacePedagogique(
+          parseFloat(arr[index].surface || 0),
+          parseFloat(arr[index].cno)
+        );
+      }
+      arr[index].heuresMax = calculerHeuresMax(
+        arr[index].semaines,
+        arr[index].heures
+      );
+      return { ...prev, [type]: arr };
     });
   };
 
-  // تغيير عدد الأسابيع
+  // تغيير CNO لكل صفوف جدول محدد
+  const updateCno = (type, value) => {
+    setCnos(prev => ({ ...prev, [type]: value }));
+    setSalles(prev => {
+      const arr = prev[type].map(salle => ({
+        ...salle,
+        cno: value,
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(value)
+        ),
+      }));
+      return { ...prev, [type]: arr };
+    });
+  };
+
+  // تغيير الأسابيع لكل صفوف جدول محدد
   const updateSemaines = (type, value) => {
-    const newSemaines = { ...semaines, [type]: value };
-    setSemaines(newSemaines);
-    setSalles((prev) => {
-      const ns = { ...prev };
-      ns[type] = ns[type].map((salle) => ({
+    setSemaines(prev => ({ ...prev, [type]: value }));
+    setSalles(prev => {
+      const arr = prev[type].map(salle => ({
         ...salle,
         semaines: value,
         heuresMax: calculerHeuresMax(value, salle.heures),
       }));
-      return ns;
+      return { ...prev, [type]: arr };
     });
   };
 
-  // تغيير عدد الساعات
+  // تغيير الساعات لكل صفوف جدول محدد
   const updateHeures = (type, value) => {
-    const newHeures = { ...heures, [type]: value };
-    setHeures(newHeures);
-    setSalles((prev) => {
-      const ns = { ...prev };
-      ns[type] = ns[type].map((salle) => ({
+    setHeures(prev => ({ ...prev, [type]: value }));
+    setSalles(prev => {
+      const arr = prev[type].map(salle => ({
         ...salle,
         heures: value,
         heuresMax: calculerHeuresMax(salle.semaines, value),
       }));
-      return ns;
+      return { ...prev, [type]: arr };
     });
   };
 
-  // إضافة صف جديد
+  // إضافة صف جديد لجدول محدد فقط
   const ajouterSalle = (type) => {
-    setSalles((prev) => ({
+    setSalles(prev => ({
       ...prev,
       [type]: [
         ...prev[type],
@@ -105,29 +118,30 @@ export default function TableauSalles({
     }));
   };
 
-  // عند الضغط على "Annuler": إذا أكثر من صف يحذف الأخير، إذا صف واحد يفرغ بياناته فقط
+  // زر الإلغاء: إذا بقي صف واحد يفرغه فقط، إذا أكثر من صف يحذف الأخير
   const annulerModification = (type) => {
-    setSalles((prev) => {
-      if (prev[type].length > 1) {
-        return {
-          ...prev,
-          [type]: prev[type].slice(0, -1),
-        };
-      } else if (prev[type].length === 1) {
+    setSalles(prev => {
+      const arr = prev[type];
+      if (arr.length > 1) {
+        return { ...prev, [type]: arr.slice(0, -1) };
+      } else {
+        // صف واحد: أفرغ بياناته فقط
         return {
           ...prev,
           [type]: [
-            defaultSalle(cnos[type], semaines[type], heures[type]),
+            {
+              ...arr[0],
+              surface: "",
+              surfaceP: 0,
+              heuresMax: calculerHeuresMax(arr[0].semaines, arr[0].heures),
+            },
           ],
         };
-      } else {
-        // لا توجد صفوف أصلاً (حالة نادرة)
-        return prev;
       }
     });
   };
 
-  // خيارات الاختيار
+  // خيارات القيم
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -146,10 +160,10 @@ export default function TableauSalles({
                 CNO:
                 <select
                   value={cnos[key]}
-                  onChange={(e) => updateCno(key, Number(e.target.value))}
+                  onChange={e => updateCno(key, Number(e.target.value))}
                   style={{ marginLeft: 8, width: 80 }}
                 >
-                  {cnoOptions.map((opt) => (
+                  {cnoOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
@@ -158,10 +172,10 @@ export default function TableauSalles({
                 Semaines:
                 <select
                   value={semaines[key]}
-                  onChange={(e) => updateSemaines(key, Number(e.target.value))}
+                  onChange={e => updateSemaines(key, Number(e.target.value))}
                   style={{ marginLeft: 8, width: 80 }}
                 >
-                  {semainesOptions.map((opt) => (
+                  {semainesOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
@@ -170,10 +184,10 @@ export default function TableauSalles({
                 Heures:
                 <select
                   value={heures[key]}
-                  onChange={(e) => updateHeures(key, Number(e.target.value))}
+                  onChange={e => updateHeures(key, Number(e.target.value))}
                   style={{ marginLeft: 8, width: 80 }}
                 >
-                  {heuresOptions.map((opt) => (
+                  {heuresOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
@@ -196,7 +210,7 @@ export default function TableauSalles({
                       <input
                         type="number"
                         value={salle.surface}
-                        onChange={(e) => handleChange(key, index, "surface", e.target.value)}
+                        onChange={e => handleChange(key, index, "surface", e.target.value)}
                         className="w-full p-1 border rounded"
                       />
                     </td>
