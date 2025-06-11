@@ -39,40 +39,38 @@ export default function TableauSalles({
   };
 
   const handleChange = (type, index, field, value) => {
-    const newSalles = {
-      ...safeSalles,
-      [type]: [...(safeSalles[type] || [])],
-    };
-    newSalles[type][index][field] = value;
-    if (field === "surface") {
-      newSalles[type][index].surfaceP = calculerSurfacePedagogique(
-        parseFloat(newSalles[type][index].surface || 0),
-        parseFloat(newSalles[type][index].cno)
+    setSalles((prev) => {
+      const next = { ...prev };
+      next[type] = [...(prev[type] || [])];
+      next[type][index][field] = value;
+      if (field === "surface") {
+        next[type][index].surfaceP = calculerSurfacePedagogique(
+          parseFloat(next[type][index].surface || 0),
+          parseFloat(next[type][index].cno)
+        );
+      }
+      next[type][index].heuresMax = calculerHeuresMax(
+        next[type][index].semaines,
+        next[type][index].heures
       );
-    }
-    newSalles[type][index].heuresMax = calculerHeuresMax(
-      newSalles[type][index].semaines,
-      newSalles[type][index].heures
-    );
-    setSalles({ ...salles, ...newSalles });
+      return next;
+    });
   };
 
   const updateCno = (type, value) => {
     const newCnos = { ...cnos, [type]: value };
     setCnos(newCnos);
     setSalles((prev) => {
-      const ns = {
-        ...safeSalles,
-        [type]: (safeSalles[type] || []).map((salle) => ({
-          ...salle,
-          cno: value,
-          surfaceP: calculerSurfacePedagogique(
-            parseFloat(salle.surface || 0),
-            parseFloat(value)
-          ),
-        })),
-      };
-      return { ...prev, ...ns };
+      const next = { ...prev };
+      next[type] = (prev[type] || []).map((salle) => ({
+        ...salle,
+        cno: value,
+        surfaceP: calculerSurfacePedagogique(
+          parseFloat(salle.surface || 0),
+          parseFloat(value)
+        ),
+      }));
+      return next;
     });
   };
 
@@ -80,15 +78,13 @@ export default function TableauSalles({
     const newSemaines = { ...semaines, [type]: value };
     setSemaines(newSemaines);
     setSalles((prev) => {
-      const ns = {
-        ...safeSalles,
-        [type]: (safeSalles[type] || []).map((salle) => ({
-          ...salle,
-          semaines: value,
-          heuresMax: calculerHeuresMax(value, salle.heures),
-        })),
-      };
-      return { ...prev, ...ns };
+      const next = { ...prev };
+      next[type] = (prev[type] || []).map((salle) => ({
+        ...salle,
+        semaines: value,
+        heuresMax: calculerHeuresMax(value, salle.heures),
+      }));
+      return next;
     });
   };
 
@@ -96,42 +92,44 @@ export default function TableauSalles({
     const newHeures = { ...heures, [type]: value };
     setHeures(newHeures);
     setSalles((prev) => {
-      const ns = {
-        ...safeSalles,
-        [type]: (safeSalles[type] || []).map((salle) => ({
-          ...salle,
-          heures: value,
-          heuresMax: calculerHeuresMax(salle.semaines, value),
-        })),
-      };
-      return { ...prev, ...ns };
+      const next = { ...prev };
+      next[type] = (prev[type] || []).map((salle) => ({
+        ...salle,
+        heures: value,
+        heuresMax: calculerHeuresMax(salle.semaines, value),
+      }));
+      return next;
     });
   };
 
   const ajouterSalle = (type) => {
-    setSalles((prev) => ({
-      ...safeSalles,
-      [type]: [
-        ...(safeSalles[type] || []),
+    setSalles((prev) => {
+      const next = { ...prev };
+      next[type] = [
+        ...(prev[type] || []),
         defaultSalle(cnos[type], semaines[type], heures[type]),
-      ],
-    }));
+      ];
+      return next;
+    });
   };
 
+  // إذا بقي صف واحد فقط، يتم تفريغه (إعادة تعيينه) وليس حذفه
   const annulerModification = (type) => {
     setSalles((prev) => {
-      if ((safeSalles[type] || []).length > 1) {
-        return {
-          ...safeSalles,
-          [type]: safeSalles[type].slice(0, -1),
-        };
+      const current = prev[type] || [];
+      if (current.length > 1) {
+        const next = { ...prev };
+        next[type] = current.slice(0, -1);
+        return next;
+      } else if (current.length === 1) {
+        const next = { ...prev };
+        next[type] = [
+          defaultSalle(cnos[type], semaines[type], heures[type])
+        ];
+        return next;
       } else {
-        return {
-          ...safeSalles,
-          [type]: [
-            defaultSalle(cnos[type], semaines[type], heures[type]),
-          ],
-        };
+        // لا يوجد صف أصلاً
+        return prev;
       }
     });
   };
