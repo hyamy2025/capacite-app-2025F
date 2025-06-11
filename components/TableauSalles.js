@@ -1,4 +1,3 @@
-console.log("apprenants", apprenants);
 import React from "react";
 import {
   calculerSurfacePedagogique,
