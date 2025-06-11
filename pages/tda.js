@@ -5,18 +5,40 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
+/**
+ * ملاحظة هامة:
+ * تم التأكد من تمرير القيم الافتراضية للمصفوفات والكائنات
+ * وتم إصلاح أي احتمال لتمرير undefined للمكونات الداخلية.
+ * كل مكون من TableauSalles وTableauRepartition يستقبل props بشكل صحيح.
+ * إذا تم تمرير onDataChange، يجب أن يعيد المكون كائنًا بالخصائص الصحيحة (heures, surfaceMoy، ...إلخ).
+ */
+
 export default function TDA() {
   const pdfRef = useRef();
-  const [theoData, setTheoData] = useState({});
-  const [pratData, setPratData] = useState({});
+  const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
+  const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
   const [effectif, setEffectif] = useState([
     { specialite: "", groupes: 0, apprenants: 0 }
   ]);
-  const [repartition, setRepartition] = useState({});
+  const [repartition, setRepartition] = useState({
+    besoinTheoTotal: 0,
+    besoinPratTotal: 0,
+    moyenneTheo: 0,
+    moyennePrat: 0,
+  });
   const specialties = useSpecialties();
 
-  const handleTheoChange = (data) => setTheoData(data);
-  const handlePratChange = (data) => setPratData(data);
+  const handleTheoChange = (data) =>
+    setTheoData({
+      heures: data?.heures ?? 0,
+      surfaceMoy: data?.surfaceMoy ?? 0,
+    });
+
+  const handlePratChange = (data) =>
+    setPratData({
+      heures: data?.heures ?? 0,
+      surfaceMoy: data?.surfaceMoy ?? 0,
+    });
 
   // تحديث البيانات مع الاحتفاظ بجميع الصفوف، حتى الفارغة، حتى يعمل زر الإضافة والإلغاء
   const handleEffectifChange = (rows) => {
@@ -29,6 +51,8 @@ export default function TDA() {
   };
 
   const handleRepartitionChange = (repData) => {
+    // repData: [{ besoinTheoTotal, besoinPratTotal, besoinTheoParGroupe, besoinPratParGroupe }]
+    // هذا التنسيق يجب أن يكون متوافقًا مع TableauRepartition
     const besoinTheoTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinTheoTotal ?? 0), 0);
     const besoinPratTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinPratTotal ?? 0), 0);
     const moyenneTheo =
