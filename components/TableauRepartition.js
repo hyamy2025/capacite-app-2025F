@@ -32,13 +32,12 @@ export default function TableauRepartition({ titre, effectifData = [], specialti
     return calculerBesoinHoraireParSpecialite(row.groupes || 0, spec["Besoin Pratique par Groupe"] || 0);
   });
 
-  // حساب المعدلات والمجاميع حسب طلبك
   const avgBesoinTheoParGroupe = besoinTheoParGroupeArr.length
     ? (besoinTheoParGroupeArr.reduce((a, b) => a + b, 0) / besoinTheoParGroupeArr.length).toFixed(2)
-    : "0.00";
+    : "0";
   const avgBesoinPratParGroupe = besoinPratParGroupeArr.length
     ? (besoinPratParGroupeArr.reduce((a, b) => a + b, 0) / besoinPratParGroupeArr.length).toFixed(2)
-    : "0.00";
+    : "0";
   const sumBesoinTheoParSpec = besoinTheoParSpecArr.reduce((a, b) => a + b, 0);
   const sumBesoinPratParSpec = besoinPratParSpecArr.reduce((a, b) => a + b, 0);
 
