@@ -39,7 +39,10 @@ export default function TableauSalles({
   };
 
   const handleChange = (type, index, field, value) => {
-    const newSalles = { ...safeSalles };
+    const newSalles = {
+      ...safeSalles,
+      [type]: [...(safeSalles[type] || [])],
+    };
     newSalles[type][index][field] = value;
     if (field === "surface") {
       newSalles[type][index].surfaceP = calculerSurfacePedagogique(
@@ -58,12 +61,17 @@ export default function TableauSalles({
     const newCnos = { ...cnos, [type]: value };
     setCnos(newCnos);
     setSalles((prev) => {
-      const ns = { ...safeSalles };
-      ns[type] = ns[type].map((salle) => ({
-        ...salle,
-        cno: value,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value)),
-      }));
+      const ns = {
+        ...safeSalles,
+        [type]: (safeSalles[type] || []).map((salle) => ({
+          ...salle,
+          cno: value,
+          surfaceP: calculerSurfacePedagogique(
+            parseFloat(salle.surface || 0),
+            parseFloat(value)
+          ),
+        })),
+      };
       return { ...prev, ...ns };
     });
   };
@@ -72,12 +80,14 @@ export default function TableauSalles({
     const newSemaines = { ...semaines, [type]: value };
     setSemaines(newSemaines);
     setSalles((prev) => {
-      const ns = { ...safeSalles };
-      ns[type] = ns[type].map((salle) => ({
-        ...salle,
-        semaines: value,
-        heuresMax: calculerHeuresMax(value, salle.heures),
-      }));
+      const ns = {
+        ...safeSalles,
+        [type]: (safeSalles[type] || []).map((salle) => ({
+          ...salle,
+          semaines: value,
+          heuresMax: calculerHeuresMax(value, salle.heures),
+        })),
+      };
       return { ...prev, ...ns };
     });
   };
@@ -86,12 +96,14 @@ export default function TableauSalles({
     const newHeures = { ...heures, [type]: value };
     setHeures(newHeures);
     setSalles((prev) => {
-      const ns = { ...safeSalles };
-      ns[type] = ns[type].map((salle) => ({
-        ...salle,
-        heures: value,
-        heuresMax: calculerHeuresMax(salle.semaines, value),
-      }));
+      const ns = {
+        ...safeSalles,
+        [type]: (safeSalles[type] || []).map((salle) => ({
+          ...salle,
+          heures: value,
+          heuresMax: calculerHeuresMax(salle.semaines, value),
+        })),
+      };
       return { ...prev, ...ns };
     });
   };
@@ -100,7 +112,7 @@ export default function TableauSalles({
     setSalles((prev) => ({
       ...safeSalles,
       [type]: [
-        ...safeSalles[type],
+        ...(safeSalles[type] || []),
         defaultSalle(cnos[type], semaines[type], heures[type]),
       ],
     }));
