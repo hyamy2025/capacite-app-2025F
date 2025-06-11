@@ -31,13 +31,15 @@ export default function TableauSalles({
   heures,
   setHeures,
 }) {
-  // salles = { theorie: [...], pratique: [...], tpSpecifiques: [...] }
-  // cnos = { theorie: 1.0, pratique: 1.0, tpSpecifiques: 1.0 }
-  // semaines = { theorie: 72, pratique: 72, tpSpecifiques: 72 }
-  // heures = { theorie: 56, pratique: 56, tpSpecifiques: 56 }
+  // حماية ضد undefined لأي نوع قاعة
+  const safeSalles = {
+    theorie: salles?.theorie || [],
+    pratique: salles?.pratique || [],
+    tpSpecifiques: salles?.tpSpecifiques || [],
+  };
 
   const handleChange = (type, index, field, value) => {
-    const newSalles = { ...salles };
+    const newSalles = { ...safeSalles };
     newSalles[type][index][field] = value;
     if (field === "surface") {
       newSalles[type][index].surfaceP = calculerSurfacePedagogique(
@@ -49,20 +51,20 @@ export default function TableauSalles({
       newSalles[type][index].semaines,
       newSalles[type][index].heures
     );
-    setSalles(newSalles);
+    setSalles({ ...salles, ...newSalles });
   };
 
   const updateCno = (type, value) => {
     const newCnos = { ...cnos, [type]: value };
     setCnos(newCnos);
     setSalles((prev) => {
-      const ns = { ...prev };
+      const ns = { ...safeSalles };
       ns[type] = ns[type].map((salle) => ({
         ...salle,
         cno: value,
         surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value)),
       }));
-      return ns;
+      return { ...prev, ...ns };
     });
   };
 
@@ -70,13 +72,13 @@ export default function TableauSalles({
     const newSemaines = { ...semaines, [type]: value };
     setSemaines(newSemaines);
     setSalles((prev) => {
-      const ns = { ...prev };
+      const ns = { ...safeSalles };
       ns[type] = ns[type].map((salle) => ({
         ...salle,
         semaines: value,
         heuresMax: calculerHeuresMax(value, salle.heures),
       }));
-      return ns;
+      return { ...prev, ...ns };
     });
   };
 
@@ -84,21 +86,21 @@ export default function TableauSalles({
     const newHeures = { ...heures, [type]: value };
     setHeures(newHeures);
     setSalles((prev) => {
-      const ns = { ...prev };
+      const ns = { ...safeSalles };
       ns[type] = ns[type].map((salle) => ({
         ...salle,
         heures: value,
         heuresMax: calculerHeuresMax(salle.semaines, value),
       }));
-      return ns;
+      return { ...prev, ...ns };
     });
   };
 
   const ajouterSalle = (type) => {
     setSalles((prev) => ({
-      ...prev,
+      ...safeSalles,
       [type]: [
-        ...prev[type],
+        ...safeSalles[type],
         defaultSalle(cnos[type], semaines[type], heures[type]),
       ],
     }));
@@ -106,14 +108,14 @@ export default function TableauSalles({
 
   const annulerModification = (type) => {
     setSalles((prev) => {
-      if (prev[type].length > 1) {
+      if ((safeSalles[type] || []).length > 1) {
         return {
-          ...prev,
-          [type]: prev[type].slice(0, -1),
+          ...safeSalles,
+          [type]: safeSalles[type].slice(0, -1),
         };
       } else {
         return {
-          ...prev,
+          ...safeSalles,
           [type]: [
             defaultSalle(cnos[type], semaines[type], heures[type]),
           ],
@@ -130,7 +132,7 @@ export default function TableauSalles({
   return (
     <div className="flex gap-4 w-full">
       {salleTitles.map(({ key, label }) => {
-        const sallesType = salles[key];
+        const sallesType = safeSalles[key] || [];
         const totalHeuresMax = sommeColonne(sallesType.map(s => Number(s.heuresMax) || 0));
         const moyenneSurfaceP = moyenneColonne(sallesType.map(s => Number(s.surfaceP) || 0));
         return (

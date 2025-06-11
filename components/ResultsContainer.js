@@ -28,10 +28,17 @@ export default function ResultsContainer() {
     { specialite: "Physique", groupes: 1, apprenants: 20 },
   ]);
 
+  // حماية ضد undefined لأي نوع قاعة
+  const safeSalles = {
+    theorie: salles?.theorie || [],
+    pratique: salles?.pratique || [],
+    tpSpecifiques: salles?.tpSpecifiques || [],
+  };
+
   // متغيرات النتائج لكل نوع قاعة
-  const totalHeuresTheo = salles.theorie.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
-  const totalHeuresPrat = salles.pratique.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
-  const totalHeuresTPS = salles.tpSpecifiques.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresTheo = safeSalles.theorie.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresPrat = safeSalles.pratique.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresTPS = safeSalles.tpSpecifiques.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
 
   const besoinTheoTotal = effectifData.reduce((sum, row) => {
     const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
@@ -60,14 +67,14 @@ export default function ResultsContainer() {
     return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
   })();
 
-  const moyenneSurfaceTheo = salles.theorie.length
-    ? (salles.theorie.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.theorie.length).toFixed(2)
+  const moyenneSurfaceTheo = safeSalles.theorie.length
+    ? (safeSalles.theorie.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / safeSalles.theorie.length).toFixed(2)
     : 0;
-  const moyenneSurfacePrat = salles.pratique.length
-    ? (salles.pratique.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.pratique.length).toFixed(2)
+  const moyenneSurfacePrat = safeSalles.pratique.length
+    ? (safeSalles.pratique.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / safeSalles.pratique.length).toFixed(2)
     : 0;
-  const moyenneSurfaceTPS = salles.tpSpecifiques.length
-    ? (salles.tpSpecifiques.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.tpSpecifiques.length).toFixed(2)
+  const moyenneSurfaceTPS = safeSalles.tpSpecifiques.length
+    ? (safeSalles.tpSpecifiques.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / safeSalles.tpSpecifiques.length).toFixed(2)
     : 0;
 
   return (
