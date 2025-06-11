@@ -114,11 +114,11 @@ export default function TDP() {
           moyenneSurfaceTheo={theoData.surfaceMoy}
         />
         <TableauRepartitionAjout
-  titre="Répartition Prévue des heures"
-  effectifData={effectif}
-  specialties={specialties}
-  onDataChange={handleRepartitionChange}
-/>
+          titre="Répartition Prévue des heures"
+          effectifData={effectif}
+          specialties={specialties}
+          onDataChange={handleRepartitionChange}
+        />
         <TableauResultats titre="Résultat" data={resultatsData} />
       </div>
     </div>
