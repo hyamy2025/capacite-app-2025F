@@ -16,7 +16,7 @@ export default function TableauResultats({ titre, data }) {
     moyenneSurfacePrat,
   } = data;
 
-  // استخدام الدوال الجديدة
+  // حماية القيم المدخلة من undefined أو القيم غير الرقمية
   const heuresRestantesTheo = calculerHeuresRestantes(totalHeuresTheo, besoinTheoTotal);
   const heuresRestantesPrat = calculerHeuresRestantes(totalHeuresPrat, besoinPratTotal);
 
@@ -50,16 +50,16 @@ export default function TableauResultats({ titre, data }) {
         <tbody>
           <tr>
             <td className="border p-2">Théorique</td>
-            <td className="border p-2 text-center">{heuresRestantesTheo}</td>
-            <td className="border p-2 text-center">{apprenantsPossiblesTheo}</td>
+            <td className="border p-2 text-center">{isNaN(heuresRestantesTheo) ? 0 : heuresRestantesTheo}</td>
+            <td className="border p-2 text-center">{isNaN(apprenantsPossiblesTheo) ? 0 : apprenantsPossiblesTheo}</td>
             <td className={`border p-2 text-center font-semibold ${etatTheo === 'Excédent' ? 'text-green-600' : 'text-red-600'}`}>
               {etatTheo}
             </td>
           </tr>
           <tr>
             <td className="border p-2">Pratique</td>
-            <td className="border p-2 text-center">{heuresRestantesPrat}</td>
-            <td className="border p-2 text-center">{apprenantsPossiblesPrat}</td>
+            <td className="border p-2 text-center">{isNaN(heuresRestantesPrat) ? 0 : heuresRestantesPrat}</td>
+            <td className="border p-2 text-center">{isNaN(apprenantsPossiblesPrat) ? 0 : apprenantsPossiblesPrat}</td>
             <td className={`border p-2 text-center font-semibold ${etatPrat === 'Excédent' ? 'text-green-600' : 'text-red-600'}`}>
               {etatPrat}
             </td>
