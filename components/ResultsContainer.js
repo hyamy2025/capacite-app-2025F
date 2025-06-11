@@ -4,8 +4,18 @@ import TableauRepartition from "./TableauRepartition";
 import TableauResultats from "./TableauResultats";
 
 const specialties = [
-  { "Spécialité": "Math", "Besoin Théorique par Groupe": 10, "Besoin Pratique par Groupe": 12 },
-  { "Spécialité": "Physique", "Besoin Théorique par Groupe": 8, "Besoin Pratique par Groupe": 14 },
+  { 
+    "Spécialité": "Math", 
+    "Besoin Théorique par Groupe": 10, 
+    "Besoin Pratique par Groupe": 12,
+    "Besoin TP Spécifique par Groupe": 6 // أضف الحقل الجديد هنا
+  },
+  { 
+    "Spécialité": "Physique", 
+    "Besoin Théorique par Groupe": 8, 
+    "Besoin Pratique par Groupe": 14,
+    "Besoin TP Spécifique par Groupe": 7 // أضف الحقل الجديد هنا
+  },
 ];
 
 const defaultSalles = {
@@ -31,7 +41,7 @@ export default function ResultsContainer() {
   // متغيرات النتائج لكل نوع قاعة
   const totalHeuresTheo = (salles?.theorie || []).reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
   const totalHeuresPrat = (salles?.pratique || []).reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
-  const totalHeuresTPS = (salles?.tpSpecifiques || []).reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresTpSpec = (salles?.tpSpecifiques || []).reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
 
   const besoinTheoTotal = effectifData.reduce((sum, row) => {
     const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
@@ -40,6 +50,10 @@ export default function ResultsContainer() {
   const besoinPratTotal = effectifData.reduce((sum, row) => {
     const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
     return sum + (Number(row.groupes) * Number(spec["Besoin Pratique par Groupe"] || 0));
+  }, 0);
+  const besoinTpSpecTotal = effectifData.reduce((sum, row) => {
+    const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
+    return sum + (Number(row.groupes) * Number(spec["Besoin TP Spécifique par Groupe"] || 0));
   }, 0);
 
   const moyenneBesoinTheo = (() => {
@@ -60,13 +74,22 @@ export default function ResultsContainer() {
     return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
   })();
 
+  const moyenneBesoinTpSpec = (() => {
+    const arr = effectifData.map(row => {
+      const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
+      return Number(spec["Besoin TP Spécifique par Groupe"]) || 0;
+    });
+    if (arr.length === 0) return 0;
+    return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+  })();
+
   const moyenneSurfaceTheo = (salles?.theorie || []).length
     ? ((salles?.theorie || []).reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / (salles?.theorie || []).length).toFixed(2)
     : 0;
   const moyenneSurfacePrat = (salles?.pratique || []).length
     ? ((salles?.pratique || []).reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / (salles?.pratique || []).length).toFixed(2)
     : 0;
-  const moyenneSurfaceTPS = (salles?.tpSpecifiques || []).length
+  const moyenneSurfaceTpSpec = (salles?.tpSpecifiques || []).length
     ? ((salles?.tpSpecifiques || []).reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / (salles?.tpSpecifiques || []).length).toFixed(2)
     : 0;
 
@@ -91,14 +114,16 @@ export default function ResultsContainer() {
         data={{
           totalHeuresTheo: Number(totalHeuresTheo),
           totalHeuresPrat: Number(totalHeuresPrat),
-          totalHeuresTPS: Number(totalHeuresTPS),
+          totalHeuresTpSpec: Number(totalHeuresTpSpec),
           besoinTheoTotal: Number(besoinTheoTotal),
           besoinPratTotal: Number(besoinPratTotal),
+          besoinTpSpecTotal: Number(besoinTpSpecTotal),
           moyenneBesoinTheo: Number(moyenneBesoinTheo),
           moyenneBesoinPrat: Number(moyenneBesoinPrat),
+          moyenneBesoinTpSpec: Number(moyenneBesoinTpSpec),
           moyenneSurfaceTheo: Number(moyenneSurfaceTheo),
           moyenneSurfacePrat: Number(moyenneSurfacePrat),
-          moyenneSurfaceTPS: Number(moyenneSurfaceTPS),
+          moyenneSurfaceTpSpec: Number(moyenneSurfaceTpSpec),
         }}
       />
     </div>
