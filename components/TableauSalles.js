@@ -6,7 +6,8 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-const defaultSalle = (cno, semaines, heures, maxApprenants = 26) => ({
+// الدالة الافتراضية لإنشاء صف جديد
+const defaultSalle = (cno, semaines, heures, maxApprenants) => ({
   surface: "",
   cno,
   semaines,
@@ -45,7 +46,7 @@ export default function TableauSalles({
     });
     if (changed) setSalles(newSalles);
     // eslint-disable-next-line
-  }, []);
+  }, [apprenants, cnos, semaines, heures]);
 
   // تغيير حقل داخل صف
   const handleChange = (type, index, field, value) => {
@@ -138,7 +139,6 @@ export default function TableauSalles({
       if (arr.length > 1) {
         return { ...prev, [type]: arr.slice(0, -1) };
       } else {
-        // صف واحد فقط: أفرغ surface فقط
         return {
           ...prev,
           [type]: [
