@@ -1,11 +1,11 @@
-export function calculerSurfacePedagogique(surface, cno) {
+export function calculerSurfacePedagogique(surface, cno, maxApprenants) {
   const result = Number(surface) / Number(cno);
   if (isNaN(result) || !isFinite(result)) return 0;
-  return result <= 26 ? parseFloat(result.toFixed(2)) : 26.0;
+  return result <= maxApprenants ? parseFloat(result.toFixed(2)) : maxApprenants;
 }
 
-export function calculerHeuresMax(semaine, heuresParSemaine = 56) {
-  const s = Number(semaine);
+export function calculerHeuresMax(semaines, heuresParSemaine = 56) {
+  const s = Number(semaines);
   const h = Number(heuresParSemaine);
   if (isNaN(s) || isNaN(h)) return 0;
   return h * s;
@@ -20,18 +20,18 @@ export function moyenneColonne(colonne) {
   return parseFloat((total / valides.length).toFixed(2));
 }
 
-export function calculerBesoinHoraireParSpecialite(nbGroupes, besoinParGroupe) {
-  const n = Number(nbGroupes);
-  const b = Number(besoinParGroupe);
-  if (isNaN(n) || isNaN(b)) return 0;
-  return n * b;
-}
-
 export function sommeColonne(colonne) {
   return colonne
     .map(val => Number(val))
     .filter(val => typeof val === 'number' && !isNaN(val))
     .reduce((acc, curr) => acc + curr, 0);
+}
+
+export function calculerBesoinHoraireParSpecialite(nbGroupes, besoinParGroupe) {
+  const n = Number(nbGroupes);
+  const b = Number(besoinParGroupe);
+  if (isNaN(n) || isNaN(b)) return 0;
+  return n * b;
 }
 
 export function calculerHeuresRestantes(sommeHeuresMax, sommeBesoinParSpecialite) {
