@@ -2,8 +2,8 @@ import React from "react";
 import {
   calculerSurfacePedagogique,
   calculerHeuresMax,
-  moyenneColonne,
-  sommeColonne
+  calculerMoyenneColonne,
+  calculerSommeColonne
 } from "../utils/calculs";
 
 const defaultSalle = (cno, semaines, heures, maxApprenants) => ({
@@ -53,6 +53,25 @@ export default function TableauSalles({
     if (changed) setSalles(newSalles);
     // eslint-disable-next-line
   }, [apprenants, cnos, semaines, heures]);
+
+  // تحديث تلقائي لكل surfaceP عند تغيير عدد المتعلمين
+  React.useEffect(() => {
+    setSalles((prev) => {
+      const newObj = {};
+      for (const key of Object.keys(prev)) {
+        newObj[key] = prev[key].map(salle => ({
+          ...salle,
+          surfaceP: calculerSurfacePedagogique(
+            parseFloat(salle.surface || 0),
+            parseFloat(salle.cno),
+            apprenants[key]
+          )
+        }));
+      }
+      return newObj;
+    });
+    // eslint-disable-next-line
+  }, [apprenants]);
 
   // تغيير حقل داخل صف
   const handleChange = (type, index, field, value) => {
@@ -193,12 +212,8 @@ export default function TableauSalles({
                 heures[key],
                 apprenants[key]
               )];
-        const totalHeuresMax = sommeColonne(
-          sallesType.map((s) => Number(s.heuresMax) || 0)
-        );
-        const moyenneSurfaceP = moyenneColonne(
-          sallesType.map((s) => Number(s.surfaceP) || 0)
-        );
+        const totalHeuresMax = calculerSommeColonne(sallesType, "heuresMax");
+        const moyenneSurfaceP = calculerMoyenneColonne(sallesType, "surfaceP");
         return (
           <div
             className="bg-white shadow rounded-2xl p-4 mb-8 flex-1"
