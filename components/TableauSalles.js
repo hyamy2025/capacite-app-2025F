@@ -30,6 +30,8 @@ export default function TableauSalles({
   setSemaines,
   heures,
   setHeures,
+  apprenants,
+  setApprenants
 }) {
   // تأكد عند أول تشغيل أن كل جدول فيه صف واحد على الأقل
   React.useEffect(() => {
@@ -53,7 +55,8 @@ export default function TableauSalles({
       if (field === "surface") {
         arr[index].surfaceP = calculerSurfacePedagogique(
           parseFloat(arr[index].surface || 0),
-          parseFloat(arr[index].cno)
+          parseFloat(arr[index].cno),
+          apprenants[type] // استخدم قيمة القائمة المختارة
         );
       }
       arr[index].heuresMax = calculerHeuresMax(
@@ -71,7 +74,7 @@ export default function TableauSalles({
       const arr = prev[type].map(salle => ({
         ...salle,
         cno: value,
-        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value))
+        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value), apprenants[type])
       }));
       return { ...prev, [type]: arr };
     });
@@ -94,6 +97,18 @@ export default function TableauSalles({
         ...salle,
         heures: value,
         heuresMax: calculerHeuresMax(salle.semaines, value)
+      }));
+      return { ...prev, [type]: arr };
+    });
+  };
+
+  // تحديث apprenants (عدد المتعلمين الأقصى لـ Surface Pédagogique)
+  const updateApprenants = (type, value) => {
+    setApprenants(prev => ({ ...prev, [type]: value }));
+    setSalles(prev => {
+      const arr = prev[type].map(salle => ({
+        ...salle,
+        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(salle.cno), value)
       }));
       return { ...prev, [type]: arr };
     });
@@ -136,6 +151,7 @@ export default function TableauSalles({
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  const apprenantsOptions = Array.from({ length: 21 }, (_, i) => 10 + i); // 10 إلى 30
 
   return (
     <div className="flex gap-4 w-full">
@@ -182,6 +198,18 @@ export default function TableauSalles({
                   style={{ marginLeft: 8, width: 80 }}
                 >
                   {heuresOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Apprenants:
+                <select
+                  value={apprenants[key]}
+                  onChange={e => updateApprenants(key, Number(e.target.value))}
+                  style={{ marginLeft: 8, width: 80 }}
+                >
+                  {apprenantsOptions.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>

@@ -43,6 +43,12 @@ export default function TDA() {
     pratique: 56,
     tpSpecifiques: 56,
   });
+  // Apprenants state لكل جدول (من 10 إلى 30، القيمة الافتراضية 26)
+  const [apprenants, setApprenants] = useState({
+    theorie: 26,
+    pratique: 26,
+    tpSpecifiques: 26,
+  });
 
   // Effectif, Repartition state
   const [effectif, setEffectif] = useState([
@@ -108,6 +114,8 @@ export default function TDA() {
             setSemaines={setSemaines}
             heures={heures}
             setHeures={setHeures}
+            apprenants={apprenants}
+            setApprenants={setApprenants}
           />
         </div>
         <TableauEffectif
