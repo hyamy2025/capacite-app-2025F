@@ -5,44 +5,41 @@ import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
-// يمكنك وضع هذه الدالة خارج المكون إذا كانت مستخدمة في أماكن أخرى
 const defaultSalle = (cno, semaines, heures) => ({
-  surface: '',
+  surface: "",
   cno,
   semaines,
   heures,
   surfaceP: 0,
-  heuresMax: 0,
+  heuresMax: Math.round(semaines * heures),
 });
 
 export default function TDA() {
   const pdfRef = useRef();
 
-  // القاعات النظرية
-  const [cnoTheo, setCnoTheo] = useState(1.0);
-  const [semainesTheo, setSemainesTheo] = useState(72);
-  const [heuresTheo, setHeuresTheo] = useState(56);
-  const [sallesTheo, setSallesTheo] = useState([
-    defaultSalle(1.0, 72, 56)
-  ]);
+  // حالات الجداول الثلاثة (نظرية - تطبيقية - TP spécifiques)
+  const [salles, setSalles] = useState({
+    theorie: [defaultSalle(1.0, 72, 56)],
+    pratique: [defaultSalle(1.0, 72, 56)],
+    tpSpecifiques: [defaultSalle(1.0, 72, 56)],
+  });
 
-  // القاعات التطبيقية
-  const [cnoPrat, setCnoPrat] = useState(1.0);
-  const [semainesPrat, setSemainesPrat] = useState(72);
-  const [heuresPrat, setHeuresPrat] = useState(56);
-  const [sallesPrat, setSallesPrat] = useState([
-    defaultSalle(1.0, 72, 56)
-  ]);
+  const [cnos, setCnos] = useState({
+    theorie: 1.0,
+    pratique: 1.0,
+    tpSpecifiques: 1.0,
+  });
+  const [semaines, setSemaines] = useState({
+    theorie: 72,
+    pratique: 72,
+    tpSpecifiques: 72,
+  });
+  const [heures, setHeures] = useState({
+    theorie: 56,
+    pratique: 56,
+    tpSpecifiques: 56,
+  });
 
-  // قاعات TP Spécifiques
-  const [cnoTPS, setCnoTPS] = useState(1.0);
-  const [semainesTPS, setSemainesTPS] = useState(72);
-  const [heuresTPS, setHeuresTPS] = useState(56);
-  const [sallesTPS, setSallesTPS] = useState([
-    defaultSalle(1.0, 72, 56)
-  ]);
-
-  // بيانات أخرى
   const [theoData, setTheoData] = useState({ heures: 0, surfaceMoy: 0 });
   const [pratData, setPratData] = useState({ heures: 0, surfaceMoy: 0 });
   const [effectif, setEffectif] = useState([
@@ -56,12 +53,13 @@ export default function TDA() {
   });
   const specialties = useSpecialties();
 
-  // تجميع بيانات
+  // استجابة تغيير القاعات النظرية
   const handleTheoChange = (data) =>
     setTheoData({
       heures: data?.heures ?? 0,
       surfaceMoy: data?.surfaceMoy ?? 0,
     });
+  // استجابة تغيير القاعات التطبيقية (يمكنك ربطها إذا أردت)
   const handlePratChange = (data) =>
     setPratData({
       heures: data?.heures ?? 0,
@@ -97,51 +95,6 @@ export default function TDA() {
     moyenneSurfacePrat: pratData.surfaceMoy,
   };
 
-  // تمرير القاعات بالطريقة الجديدة الموحدة
-  const sallesObj = {
-    theorie: sallesTheo,
-    pratique: sallesPrat,
-    tpSpecifiques: sallesTPS,
-  };
-  const setSallesObj = (newSalles) => {
-    setSallesTheo(newSalles.theorie || []);
-    setSallesPrat(newSalles.pratique || []);
-    setSallesTPS(newSalles.tpSpecifiques || []);
-  };
-
-  const cnos = {
-    theorie: cnoTheo,
-    pratique: cnoPrat,
-    tpSpecifiques: cnoTPS,
-  };
-  const setCnos = (newCnos) => {
-    setCnoTheo(newCnos.theorie ?? 1.0);
-    setCnoPrat(newCnos.pratique ?? 1.0);
-    setCnoTPS(newCnos.tpSpecifiques ?? 1.0);
-  };
-
-  const semaines = {
-    theorie: semainesTheo,
-    pratique: semainesPrat,
-    tpSpecifiques: semainesTPS,
-  };
-  const setSemainesAll = (newSemaines) => {
-    setSemainesTheo(newSemaines.theorie ?? 72);
-    setSemainesPrat(newSemaines.pratique ?? 72);
-    setSemainesTPS(newSemaines.tpSpecifiques ?? 72);
-  };
-
-  const heures = {
-    theorie: heuresTheo,
-    pratique: heuresPrat,
-    tpSpecifiques: heuresTPS,
-  };
-  const setHeuresAll = (newHeures) => {
-    setHeuresTheo(newHeures.theorie ?? 56);
-    setHeuresPrat(newHeures.pratique ?? 56);
-    setHeuresTPS(newHeures.tpSpecifiques ?? 56);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div ref={pdfRef}>
@@ -150,14 +103,14 @@ export default function TDA() {
         </h1>
         <div className="flex gap-6 flex-wrap mb-8">
           <TableauSalles
-            salles={sallesObj}
-            setSalles={setSallesObj}
+            salles={salles}
+            setSalles={setSalles}
             cnos={cnos}
             setCnos={setCnos}
             semaines={semaines}
-            setSemaines={setSemainesAll}
+            setSemaines={setSemaines}
             heures={heures}
-            setHeures={setHeuresAll}
+            setHeures={setHeures}
             onDataChange={handleTheoChange}
           />
         </div>
