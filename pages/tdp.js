@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import TableauSalles from "../components/TableauSalles";
 import TableauEffectifAjout from "../components/TableauEffectifAjout"; // التغيير هنا
-import TableauRepartition from "../components/TableauRepartition";
+import TableauRepartitionAjout from "../components/TableauRepartitionAjout";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
 
