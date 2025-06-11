@@ -8,29 +8,37 @@ export default function TableauResultats({ data }) {
   const {
     totalHeuresTheo,
     totalHeuresPrat,
+    totalHeuresTpSpec,
     besoinTheoTotal,
     besoinPratTotal,
+    besoinTpSpecTotal,
     moyenneBesoinTheo,
     moyenneBesoinPrat,
+    moyenneBesoinTpSpec,
     moyenneSurfaceTheo,
     moyenneSurfacePrat,
+    moyenneSurfaceTpSpec,
   } = data;
 
   const heuresRestantesTheo = calculerHeuresRestantes(totalHeuresTheo, besoinTheoTotal);
   const heuresRestantesPrat = calculerHeuresRestantes(totalHeuresPrat, besoinPratTotal);
+  const heuresRestantesTpSpec = calculerHeuresRestantes(totalHeuresTpSpec, besoinTpSpecTotal);
 
   const apprenantsPossiblesTheo = calculerApprenantsPossibles(
     heuresRestantesTheo, moyenneBesoinTheo, moyenneSurfaceTheo
   );
-
   const apprenantsPossiblesPrat = calculerApprenantsPossibles(
     heuresRestantesPrat, moyenneBesoinPrat, moyenneSurfacePrat
+  );
+  const apprenantsPossiblesTpSpec = calculerApprenantsPossibles(
+    heuresRestantesTpSpec, moyenneBesoinTpSpec, moyenneSurfaceTpSpec
   );
 
   const etatTheo = determinerEtat(heuresRestantesTheo);
   const etatPrat = determinerEtat(heuresRestantesPrat);
+  const etatTpSpec = determinerEtat(heuresRestantesTpSpec);
 
-  const testGlobal = etatTheo === 'Excédent' && etatPrat === 'Excédent' ? 'Excédent' : 'Dépassement';
+  const testGlobal = etatTheo === 'Excédent' && etatPrat === 'Excédent' && etatTpSpec === 'Excédent' ? 'Excédent' : 'Dépassement';
   const couleurGlobal = testGlobal === 'Excédent' ? 'text-green-600' : 'text-red-600';
 
   return (
@@ -60,6 +68,14 @@ export default function TableauResultats({ data }) {
             <td className="border p-2 text-center">{isNaN(apprenantsPossiblesPrat) ? 0 : apprenantsPossiblesPrat}</td>
             <td className={`border p-2 text-center font-semibold ${etatPrat === 'Excédent' ? 'text-green-600' : 'text-red-600'}`}>
               {etatPrat}
+            </td>
+          </tr>
+          <tr>
+            <td className="border p-2">TP Spécifique</td>
+            <td className="border p-2 text-center">{isNaN(heuresRestantesTpSpec) ? 0 : heuresRestantesTpSpec}</td>
+            <td className="border p-2 text-center">{isNaN(apprenantsPossiblesTpSpec) ? 0 : apprenantsPossiblesTpSpec}</td>
+            <td className={`border p-2 text-center font-semibold ${etatTpSpec === 'Excédent' ? 'text-green-600' : 'text-red-600'}`}>
+              {etatTpSpec}
             </td>
           </tr>
           <tr>

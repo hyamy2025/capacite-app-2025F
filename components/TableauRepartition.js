@@ -113,12 +113,30 @@ export default function TableauRepartition({ effectifData, specialties, onDataCh
         </tbody>
         <tfoot>
           <tr>
-            <td className="border p-2 font-bold text-right"> Moyenne / Somme</td>
+            <td className="border p-2 font-bold text-right">Moyenne / Somme Théorique</td>
             <td className="border p-2 text-center font-bold">{avgBesoinTheoParGroupe}</td>
-            <td className="border p-2 text-center font-bold">{avgBesoinPratParGroupe}</td>
-            <td className="border p-2 text-center font-bold">{avgBesoinTpSpecParGroupe}</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold"></td>
             <td className="border p-2 text-center font-bold">{sumBesoinTheoParSpec}</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold"></td>
+          </tr>
+          <tr>
+            <td className="border p-2 font-bold text-right">Moyenne / Somme Pratique</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold">{avgBesoinPratParGroupe}</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold"></td>
             <td className="border p-2 text-center font-bold">{sumBesoinPratParSpec}</td>
+            <td className="border p-2 text-center font-bold"></td>
+          </tr>
+          <tr>
+            <td className="border p-2 font-bold text-right">Moyenne / Somme TP Spécifique</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold">{avgBesoinTpSpecParGroupe}</td>
+            <td className="border p-2 text-center font-bold"></td>
+            <td className="border p-2 text-center font-bold"></td>
             <td className="border p-2 text-center font-bold">{sumBesoinTpSpecParSpec}</td>
           </tr>
         </tfoot>
