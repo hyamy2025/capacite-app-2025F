@@ -52,13 +52,12 @@ export default function TableauSalles({
     setSalles(prev => {
       const arr = prev[type].slice();
       arr[index] = { ...arr[index], [field]: value };
-      if (field === "surface") {
-        arr[index].surfaceP = calculerSurfacePedagogique(
-          parseFloat(arr[index].surface || 0),
-          parseFloat(arr[index].cno),
-          apprenants[type] // استخدم قيمة القائمة المختارة
-        );
-      }
+      // surfaceP يجب أن تُحسب دائمًا مع apprenants[type] وليس فقط عند field === "surface"
+      arr[index].surfaceP = calculerSurfacePedagogique(
+        parseFloat(arr[index].surface || 0),
+        parseFloat(arr[index].cno),
+        apprenants[type]
+      );
       arr[index].heuresMax = calculerHeuresMax(
         arr[index].semaines,
         arr[index].heures
@@ -120,7 +119,14 @@ export default function TableauSalles({
       ...prev,
       [type]: [
         ...prev[type],
-        defaultSalle(cnos[type], semaines[type], heures[type]),
+        {
+          ...defaultSalle(cnos[type], semaines[type], heures[type]),
+          surfaceP: calculerSurfacePedagogique(
+            0, // surface starts empty
+            cnos[type],
+            apprenants[type]
+          )
+        },
       ],
     }));
   };
@@ -139,7 +145,7 @@ export default function TableauSalles({
             {
               ...arr[0],
               surface: "",
-              surfaceP: 0,
+              surfaceP: calculerSurfacePedagogique(0, arr[0].cno, apprenants[type]),
               heuresMax: calculerHeuresMax(arr[0].semaines, arr[0].heures)
             }
           ]
