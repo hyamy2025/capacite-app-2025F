@@ -6,7 +6,6 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-// الدالة التي تعيد صف افتراضي
 const defaultSalle = (cno, semaines, heures) => ({
   surface: "",
   cno,
@@ -32,7 +31,7 @@ export default function TableauSalles({
   heures,
   setHeures,
 }) {
-  // تأكيد وجود صف واحد على الأقل في كل جدول عند بداية التشغيل
+  // تأكد عند أول تشغيل أن كل جدول فيه صف واحد على الأقل
   React.useEffect(() => {
     let changed = false;
     const newSalles = { ...salles };
@@ -46,7 +45,7 @@ export default function TableauSalles({
     // eslint-disable-next-line
   }, []);
 
-  // تغيير قيمة حقل في صف معين
+  // تغيير حقل داخل صف
   const handleChange = (type, index, field, value) => {
     setSalles(prev => {
       const arr = prev[type].slice();
@@ -65,49 +64,42 @@ export default function TableauSalles({
     });
   };
 
-  // تغيير CNO لكل صفوف جدول محدد
+  // تحديث القيم العامة (تؤثر على كل صفوف الجدول فقط)
   const updateCno = (type, value) => {
     setCnos(prev => ({ ...prev, [type]: value }));
     setSalles(prev => {
       const arr = prev[type].map(salle => ({
         ...salle,
         cno: value,
-        surfaceP: calculerSurfacePedagogique(
-          parseFloat(salle.surface || 0),
-          parseFloat(value)
-        ),
+        surfaceP: calculerSurfacePedagogique(parseFloat(salle.surface || 0), parseFloat(value))
       }));
       return { ...prev, [type]: arr };
     });
   };
-
-  // تغيير الأسابيع لكل صفوف جدول محدد
   const updateSemaines = (type, value) => {
     setSemaines(prev => ({ ...prev, [type]: value }));
     setSalles(prev => {
       const arr = prev[type].map(salle => ({
         ...salle,
         semaines: value,
-        heuresMax: calculerHeuresMax(value, salle.heures),
+        heuresMax: calculerHeuresMax(value, salle.heures)
       }));
       return { ...prev, [type]: arr };
     });
   };
-
-  // تغيير الساعات لكل صفوف جدول محدد
   const updateHeures = (type, value) => {
     setHeures(prev => ({ ...prev, [type]: value }));
     setSalles(prev => {
       const arr = prev[type].map(salle => ({
         ...salle,
         heures: value,
-        heuresMax: calculerHeuresMax(salle.semaines, value),
+        heuresMax: calculerHeuresMax(salle.semaines, value)
       }));
       return { ...prev, [type]: arr };
     });
   };
 
-  // إضافة صف جديد لجدول محدد فقط
+  // إضافة صف جديد بشكل مستقل لكل جدول
   const ajouterSalle = (type) => {
     setSalles(prev => ({
       ...prev,
@@ -118,14 +110,14 @@ export default function TableauSalles({
     }));
   };
 
-  // زر الإلغاء: إذا بقي صف واحد يفرغه فقط، إذا أكثر من صف يحذف الأخير
+  // زر الإلغاء: إذا أكثر من صف يحذف الأخير، إذا صف واحد فقط يفرغه
   const annulerModification = (type) => {
     setSalles(prev => {
       const arr = prev[type];
       if (arr.length > 1) {
         return { ...prev, [type]: arr.slice(0, -1) };
       } else {
-        // صف واحد: أفرغ بياناته فقط
+        // صف واحد فقط: أفرغ surface فقط
         return {
           ...prev,
           [type]: [
@@ -133,15 +125,14 @@ export default function TableauSalles({
               ...arr[0],
               surface: "",
               surfaceP: 0,
-              heuresMax: calculerHeuresMax(arr[0].semaines, arr[0].heures),
-            },
-          ],
+              heuresMax: calculerHeuresMax(arr[0].semaines, arr[0].heures)
+            }
+          ]
         };
       }
     });
   };
 
-  // خيارات القيم
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -149,7 +140,10 @@ export default function TableauSalles({
   return (
     <div className="flex gap-4 w-full">
       {salleTitles.map(({ key, label }) => {
-        const sallesType = salles[key];
+        // إذا لم يوجد صفوف (حالة نادرة بسبب useEffect) ضع صف افتراضي
+        const sallesType = salles[key] && salles[key].length > 0
+          ? salles[key]
+          : [defaultSalle(cnos[key], semaines[key], heures[key])];
         const totalHeuresMax = sommeColonne(sallesType.map(s => Number(s.heuresMax) || 0));
         const moyenneSurfaceP = moyenneColonne(sallesType.map(s => Number(s.surfaceP) || 0));
         return (
