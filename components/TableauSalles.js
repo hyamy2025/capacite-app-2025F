@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   calculerSurfacePedagogique,
   calculerHeuresMax,
@@ -6,7 +6,18 @@ import {
   sommeColonne
 } from "../utils/calculs";
 
-export default function TableauSalles({ salles, setSalles, cno, setCno, semaines, setSemaines, heures, setHeures }) {
+export default function TableauSalles({
+  titre = "Salles",
+  salles,
+  setSalles,
+  cno,
+  setCno,
+  semaines,
+  setSemaines,
+  heures,
+  setHeures,
+  onDataChange,
+}) {
   const heuresOptions = [40, 42, 44, 46, 48, 50, 52, 54 ,56 ,58 ,60];
   const cnoOptions = Array.from({ length: 21 }, (_, i) => (1 + i * 0.1).toFixed(1));
   const semainesOptions = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -93,9 +104,19 @@ export default function TableauSalles({ salles, setSalles, cno, setCno, semaines
   const totalHeuresMax = sommeColonne(salles.map(s => Number(s.heuresMax) || 0));
   const moyenneSurfaceP = moyenneColonne(salles.map(s => Number(s.surfaceP) || 0));
 
+  // تحديث النتائج للأب عند أي تغيير
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        heures: totalHeuresMax,
+        surfaceMoy: moyenneSurfaceP,
+      });
+    }
+  }, [salles, totalHeuresMax, moyenneSurfaceP, onDataChange]);
+
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8 flex-1">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">Salles</h2>
+      <h2 className="text-xl font-bold text-gray-700 mb-4">{titre}</h2>
       <div style={{ marginBottom: 16, display: "flex", gap: "2rem" }}>
         <label>
           CNO:

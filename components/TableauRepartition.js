@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { calculerBesoinHoraireParSpecialite } from "../utils/calculs";
 
-export default function TableauRepartition({ effectifData, specialties, setEffectifData }) {
+export default function TableauRepartition({ effectifData, specialties, onDataChange }) {
   const findSpecialtyData = (specialite) => {
     return specialties.find(s => s["Spécialité"] === specialite) || {};
   };
@@ -39,6 +39,20 @@ export default function TableauRepartition({ effectifData, specialties, setEffec
     : "0";
   const sumBesoinTheoParSpec = besoinTheoParSpecArr.reduce((a, b) => a + b, 0);
   const sumBesoinPratParSpec = besoinPratParSpecArr.reduce((a, b) => a + b, 0);
+
+  // تحديث النتائج للأب عند أي تغيير
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange([
+        {
+          besoinTheoTotal: sumBesoinTheoParSpec,
+          besoinPratTotal: sumBesoinPratParSpec,
+          besoinTheoParGroupe: Number(avgBesoinTheoParGroupe),
+          besoinPratParGroupe: Number(avgBesoinPratParGroupe),
+        }
+      ]);
+    }
+  }, [sumBesoinTheoParSpec, sumBesoinPratParSpec, avgBesoinTheoParGroupe, avgBesoinPratParGroupe, onDataChange]);
 
   return (
     <div className="bg-white shadow rounded-2xl p-4 mb-8">

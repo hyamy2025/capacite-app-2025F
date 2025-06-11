@@ -56,22 +56,14 @@ export default function TDA() {
     }
   };
 
+  // التقاط أول عنصر من مصفوفة بيانات التوزيع
   const handleRepartitionChange = (repData) => {
-    const besoinTheoTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinTheoTotal ?? 0), 0);
-    const besoinPratTotal = (repData ?? []).reduce((sum, r = {}) => sum + (r.besoinPratTotal ?? 0), 0);
-    const moyenneTheo =
-      repData?.length
-        ? repData.reduce((sum, r = {}) => sum + parseFloat(r.besoinTheoParGroupe ?? 0), 0) / repData.length
-        : 0;
-    const moyennePrat =
-      repData?.length
-        ? repData.reduce((sum, r = {}) => sum + parseFloat(r.besoinPratParGroupe ?? 0), 0) / repData.length
-        : 0;
+    const r = (Array.isArray(repData) && repData.length > 0) ? repData[0] : {};
     setRepartition({
-      besoinTheoTotal,
-      besoinPratTotal,
-      moyenneTheo: parseFloat(moyenneTheo.toFixed(2)),
-      moyennePrat: parseFloat(moyennePrat.toFixed(2)),
+      besoinTheoTotal: r.besoinTheoTotal ?? 0,
+      besoinPratTotal: r.besoinPratTotal ?? 0,
+      moyenneTheo: r.besoinTheoParGroupe ?? 0,
+      moyennePrat: r.besoinPratParGroupe ?? 0,
     });
   };
 
