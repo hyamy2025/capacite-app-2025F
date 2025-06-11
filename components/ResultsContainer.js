@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import TableauSalles from "./TableauSalles";
-import TableauSallesTPSpecifiques from "./TableauSallesTPSpecifiques";
 import TableauRepartition from "./TableauRepartition";
 import TableauResultats from "./TableauResultats";
 
@@ -9,28 +8,31 @@ const specialties = [
   { "Spécialité": "Physique", "Besoin Théorique par Groupe": 8, "Besoin Pratique par Groupe": 14 },
 ];
 
+const defaultSalles = {
+  theorie: [{ surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 }],
+  pratique: [{ surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 }],
+  tpSpecifiques: [{ surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 }],
+};
+
+const defaultCnos = { theorie: 1.0, pratique: 1.0, tpSpecifiques: 1.0 };
+const defaultSemaines = { theorie: 72, pratique: 72, tpSpecifiques: 72 };
+const defaultHeures = { theorie: 56, pratique: 56, tpSpecifiques: 56 };
+
 export default function ResultsContainer() {
-  const [cno, setCno] = useState(1.0);
-  const [semaines, setSemaines] = useState(72);
-  const [heures, setHeures] = useState(56);
-  const [salles, setSalles] = useState([
-    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
-  ]);
-  // الحالة الجديدة لسلاسل TP spécifiques
-  const [cnoTPS, setCnoTPS] = useState(1.0);
-  const [semainesTPS, setSemainesTPS] = useState(72);
-  const [heuresTPS, setHeuresTPS] = useState(56);
-  const [sallesTPS, setSallesTPS] = useState([
-    { surface: '', cno: 1.0, semaines: 72, heures: 56, surfaceP: 0, heuresMax: 0 },
-  ]);
+  const [salles, setSalles] = useState(defaultSalles);
+  const [cnos, setCnos] = useState(defaultCnos);
+  const [semaines, setSemaines] = useState(defaultSemaines);
+  const [heures, setHeures] = useState(defaultHeures);
   const [effectifData, setEffectifData] = useState([
     { specialite: "Math", groupes: 2, apprenants: 30 },
     { specialite: "Physique", groupes: 1, apprenants: 20 },
   ]);
 
-  // الحسابات المجمعة للتمرير إلى TableauResultats
-  const totalHeuresTheo = salles.reduce((sum, s) => sum + Number(s.heuresMax||0), 0);
-  const totalHeuresPrat = sallesTPS.reduce((sum, s) => sum + Number(s.heuresMax||0), 0);
+  // متغيرات النتائج لكل نوع قاعة
+  const totalHeuresTheo = salles.theorie.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresPrat = salles.pratique.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+  const totalHeuresTPS = salles.tpSpecifiques.reduce((sum, s) => sum + Number(s.heuresMax || 0), 0);
+
   const besoinTheoTotal = effectifData.reduce((sum, row) => {
     const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
     return sum + (Number(row.groupes) * Number(spec["Besoin Théorique par Groupe"] || 0));
@@ -58,52 +60,45 @@ export default function ResultsContainer() {
     return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
   })();
 
-  const moyenneSurfaceTheo = salles.length
-    ? (salles.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.length).toFixed(2)
+  const moyenneSurfaceTheo = salles.theorie.length
+    ? (salles.theorie.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.theorie.length).toFixed(2)
     : 0;
-  const moyenneSurfacePrat = sallesTPS.length
-    ? (sallesTPS.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / sallesTPS.length).toFixed(2)
+  const moyenneSurfacePrat = salles.pratique.length
+    ? (salles.pratique.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.pratique.length).toFixed(2)
+    : 0;
+  const moyenneSurfaceTPS = salles.tpSpecifiques.length
+    ? (salles.tpSpecifiques.reduce((a, s) => a + Number(s.surfaceP) || 0, 0) / salles.tpSpecifiques.length).toFixed(2)
     : 0;
 
   return (
     <div>
-      <div className="flex gap-6">
-        <TableauSalles
-          salles={salles}
-          setSalles={setSalles}
-          cno={cno}
-          setCno={setCno}
-          semaines={semaines}
-          setSemaines={setSemaines}
-          heures={heures}
-          setHeures={setHeures}
-        />
-        <TableauSallesTPSpecifiques
-          salles={sallesTPS}
-          setSalles={setSallesTPS}
-          cno={cnoTPS}
-          setCno={setCnoTPS}
-          semaines={semainesTPS}
-          setSemaines={setSemainesTPS}
-          heures={heuresTPS}
-          setHeures={setHeuresTPS}
-        />
-        <TableauRepartition
-          effectifData={effectifData}
-          specialties={specialties}
-          setEffectifData={setEffectifData}
-        />
-      </div>
+      <TableauSalles
+        salles={salles}
+        setSalles={setSalles}
+        cnos={cnos}
+        setCnos={setCnos}
+        semaines={semaines}
+        setSemaines={setSemaines}
+        heures={heures}
+        setHeures={setHeures}
+      />
+      <TableauRepartition
+        effectifData={effectifData}
+        specialties={specialties}
+        setEffectifData={setEffectifData}
+      />
       <TableauResultats
         data={{
           totalHeuresTheo: Number(totalHeuresTheo),
           totalHeuresPrat: Number(totalHeuresPrat),
+          totalHeuresTPS: Number(totalHeuresTPS),
           besoinTheoTotal: Number(besoinTheoTotal),
           besoinPratTotal: Number(besoinPratTotal),
           moyenneBesoinTheo: Number(moyenneBesoinTheo),
           moyenneBesoinPrat: Number(moyenneBesoinPrat),
           moyenneSurfaceTheo: Number(moyenneSurfaceTheo),
           moyenneSurfacePrat: Number(moyenneSurfacePrat),
+          moyenneSurfaceTPS: Number(moyenneSurfaceTPS),
         }}
       />
     </div>
