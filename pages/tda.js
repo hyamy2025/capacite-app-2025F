@@ -4,6 +4,7 @@ import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
+import { generatePDF } from "../components/generatePDF";
 
 // دوال مساعدة مباشرة
 const moyenne = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
@@ -164,6 +165,27 @@ export default function TDA() {
           }}
         >
           Page d&apos;accueil
+        </button>
+      </div>
+
+      {/* زر توليد ملف PDF */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+        <button
+          onClick={() => generatePDF({ titre: "Test de Dépassement Actuel", ref: pdfRef })}
+          style={{
+            background: "#10b981",
+            color: "#fff",
+            padding: "12px 28px",
+            borderRadius: "8px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px #0001",
+            transition: "background 0.2s"
+          }}
+        >
+          Générer le PDF
         </button>
       </div>
     </div>
