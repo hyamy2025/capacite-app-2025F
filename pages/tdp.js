@@ -1,12 +1,12 @@
 import { useRef, useState, useEffect } from "react";
 import TableauSalles from "../components/TableauSalles";
-import TableauEffectifAjout from "../components/TableauEffectifAjout";
-import TableauRepartitionAjout from "../components/TableauRepartitionAjout";
+import TableauEffectif from "../components/TableauEffectif";
+import TableauRepartition from "../components/TableauRepartition";
 import TableauResultats from "../components/TableauResultats";
 import useSpecialties from "../components/useSpecialties";
-import { generatePDF } from "../components/generatePDF";
+import { generatePDF } from "../components/generatePDF"; // نفس دالة PDF المستخدمة في tda.js
 
-// دوال مساعدة مباشرة
+// دوال مساعدة
 const moyenne = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 const somme = arr => arr.reduce((a, b) => a + b, 0);
 
@@ -33,10 +33,7 @@ export default function TDP() {
   const [heures, setHeures] = useState({ theorie: 56, pratique: 56, tpSpecifiques: 56 });
   const [apprenants, setApprenants] = useState({ theorie: 26, pratique: 26, tpSpecifiques: 26 });
 
-  const [effectif, setEffectif] = useState([
-    { specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }
-  ]);
-
+  const [effectif, setEffectif] = useState([{ specialite: "", groupes: 0, apprenants: 0 }]);
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
     besoinPratTotal: 0,
@@ -48,6 +45,18 @@ export default function TDP() {
 
   const specialties = useSpecialties();
 
+  // تحميل البيانات من localStorage عند التشغيل
+  useEffect(() => {
+    const saved = localStorage.getItem("tdpData");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setSalles(parsed.salles);
+      setEffectif(parsed.effectif);
+      setRepartition(parsed.repartition);
+    }
+  }, []);
+
+  // ملخصات القاعات
   const totalHeuresTheo = somme(salles.theorie.map(s => Number(s.heuresMax) || 0));
   const totalHeuresPrat = somme(salles.pratique.map(s => Number(s.heuresMax) || 0));
   const totalHeuresTpSpec = somme(salles.tpSpecifiques.map(s => Number(s.heuresMax) || 0));
@@ -71,15 +80,11 @@ export default function TDP() {
   };
 
   const handleEffectifChange = (rows) => {
-    if (!rows || rows.length === 0) {
-      setEffectif([{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }]);
-    } else {
-      setEffectif(rows);
-    }
+    setEffectif(rows.length ? rows : [{ specialite: "", groupes: 0, apprenants: 0 }]);
   };
 
   const handleRepartitionChange = (repData) => {
-    const r = (Array.isArray(repData) && repData.length > 0) ? repData[0] : {};
+    const r = Array.isArray(repData) && repData.length > 0 ? repData[0] : {};
     setRepartition({
       besoinTheoTotal: r.besoinTheoTotal ?? 0,
       besoinPratTotal: r.besoinPratTotal ?? 0,
@@ -90,37 +95,38 @@ export default function TDP() {
     });
   };
 
-  // ⬇️ حفظ واسترجاع البيانات من localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("tdpData");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setSalles(parsed.salles);
-      setCnos(parsed.cnos);
-      setSemaines(parsed.semaines);
-      setHeures(parsed.heures);
-      setApprenants(parsed.apprenants);
-      setEffectif(parsed.effectif);
-      setRepartition(parsed.repartition);
-    }
-  }, []);
-
+  // حفظ البيانات في localStorage
   const handleSave = () => {
-    const data = { salles, cnos, semaines, heures, apprenants, effectif, repartition };
+    const data = { salles, effectif, repartition };
     localStorage.setItem("tdpData", JSON.stringify(data));
-    alert("Les données ont été sauvegardées.");
+    alert("Les données ont été enregistrées !");
   };
 
-  const handleClear = () => {
+  // إعادة التهيئة
+  const handleReset = () => {
     localStorage.removeItem("tdpData");
-    window.location.reload();
+    setSalles({
+      theorie: [defaultSalle(1.0, 72, 56)],
+      pratique: [defaultSalle(1.0, 72, 56)],
+      tpSpecifiques: [defaultSalle(1.0, 72, 56)],
+    });
+    setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
+    setRepartition({
+      besoinTheoTotal: 0,
+      besoinPratTotal: 0,
+      besoinTpSpecTotal: 0,
+      moyenneTheo: 0,
+      moyennePrat: 0,
+      moyenneTpSpec: 0,
+    });
+    alert("Les données ont été réinitialisées.");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div ref={pdfRef}>
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Test de Dépassement Prévu
+          Test de Dépassement Prévisionnel
         </h1>
         <div className="flex gap-6 flex-wrap mb-8">
           <TableauSalles
@@ -136,17 +142,16 @@ export default function TDP() {
             setApprenants={setApprenants}
           />
         </div>
-        <TableauEffectifAjout
-          titre="Effectif Prévu"
+        <TableauEffectif
+          titre="Effectif Prévisionnel"
           specialties={specialties}
           modeActuel={false}
           onDataChange={handleEffectifChange}
           data={effectif}
           salles={salles}
-          moyenneSurfaceTheo={moyenneSurfaceTheo}
         />
-        <TableauRepartitionAjout
-          titre="Répartition Prévue des heures"
+        <TableauRepartition
+          titre="Répartition prévisionnelle des heures"
           effectifData={effectif}
           specialties={specialties}
           onDataChange={handleRepartitionChange}
@@ -155,7 +160,7 @@ export default function TDP() {
         <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
       </div>
 
-      {/* الأزرار في صف أفقي */}
+      {/* أزرار في صف أفقي */}
       <div className="flex flex-wrap justify-center gap-4 mt-10">
         <button
           onClick={() => window.location.href = "/"}
@@ -164,7 +169,7 @@ export default function TDP() {
           Page d&apos;accueil
         </button>
         <button
-          onClick={() => generatePDF({ titre: "Test de Dépassement Actuel", ref: pdfRef })}
+          onClick={() => generatePDF({ titre: "Test de Dépassement Prévisionnel", ref: pdfRef })}
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md shadow"
         >
           Générer le PDF
