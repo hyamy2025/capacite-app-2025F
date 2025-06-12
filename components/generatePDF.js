@@ -6,7 +6,8 @@ export async function generatePDF({ titre, ref }) {
   if (!element) return;
 
   try {
-    const canvas = await html2canvas(element, { scale: 2 });
+    // Capture de l’élément en image
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -16,9 +17,8 @@ export async function generatePDF({ titre, ref }) {
     const numEnregistrement = localStorage.getItem('numEnregistrement') || '---';
     const dateGeneration = new Date().toLocaleDateString();
 
-    // Logo ministère (image base64 à remplacer si besoin)
-    const logoUrl = '/logo-ministere.png'; // S’assurer que cette image existe dans public/
-
+    // Chargement du logo (doit exister dans public/)
+    const logoUrl = '/logo-ministere.png';
     const logo = await new Promise((resolve, reject) => {
       const img = new Image();
       img.src = logoUrl;
@@ -35,26 +35,27 @@ export async function generatePDF({ titre, ref }) {
     ctx.drawImage(logo, 0, 0);
     const logoData = logoCanvas.toDataURL('image/png');
 
-    // Affichage logo
-    pdf.addImage(logoData, 'PNG', 10, 10, 30, 30);
+    // Affichage du logo
+    pdf.addImage(logoData, 'PNG', 10, 10, 20, 20); // Taille ajustée à 20x20mm
 
-    // Titre au centre
+    // Titre centré
     pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
     pdf.text(titre, pageWidth / 2, 20, { align: 'center' });
 
-    // Infos supplémentaires
+    // Infos complémentaires
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(50); // Gris foncé
     pdf.text(`Nom de la structure : ${nomStructure}`, 50, 30);
     pdf.text(`N° d'enregistrement : ${numEnregistrement}`, 50, 36);
     pdf.text(`Date de génération : ${dateGeneration}`, 50, 42);
+    pdf.setTextColor(0); // Revenir au noir
 
-    // Image principale (contenu)
+    // Image principale (contenu capturé)
     const imgProps = pdf.getImageProperties(imgData);
     const pdfWidth = pageWidth - 20;
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
     pdf.addImage(imgData, 'PNG', 10, 55, pdfWidth, pdfHeight);
 
     // Nom de fichier personnalisé
@@ -62,9 +63,12 @@ export async function generatePDF({ titre, ref }) {
     const dateStr = new Date().toISOString().split('T')[0];
     const fileName = `${cleanTitle}_${nomStructure.replace(/\s+/g, '_')}_${dateStr}.pdf`;
 
+    // Sauvegarde du PDF
     pdf.save(fileName);
   } catch (error) {
     alert("Erreur lors de la création du PDF. Veuillez réessayer.");
-    console.error(error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(error);
+    }
   }
 }
