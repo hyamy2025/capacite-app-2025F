@@ -45,7 +45,17 @@ export function calculerApprenantsPossibles(heuresRestantes, moyenneBesoinParGro
   const h = Number(heuresRestantes);
   const m = Number(moyenneBesoinParGroupe);
   const s = Number(moyenneSurfacePedagogique);
-  if (isNaN(h) || isNaN(m) || isNaN(s) || m === 0) return 0;
+
+  // Logging for debugging
+  console.log("---- DEBUG: calculerApprenantsPossibles ----");
+  console.log("heuresRestantes:", h);
+  console.log("moyenneBesoinParGroupe:", m);
+  console.log("moyenneSurfacePedagogique:", s);
+
+  if (isNaN(h) || isNaN(m) || isNaN(s) || m === 0 || s === 0) {
+    console.warn("Invalid input detected. Returning 0.");
+    return 0;
+  }
   return Math.round((h / m) * s);
 }
 
