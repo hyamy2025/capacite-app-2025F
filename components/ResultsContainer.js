@@ -58,30 +58,36 @@ export default function ResultsContainer() {
   }, 0);
 
   const moyenneBesoinTheo = (() => {
-    const arr = effectifData.map(row => {
-      const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
-      return Number(spec["Besoin Théorique par Groupe"]) || 0;
-    });
+    const arr = effectifData
+      .filter(row => row.specialite && specialties.some(s => s["Spécialité"] === row.specialite))
+      .map(row => {
+        const spec = specialties.find(s => s["Spécialité"] === row.specialite);
+        return Number(spec["Besoin Théorique par Groupe"]) || 0;
+      });
     if (arr.length === 0) return 0;
-    return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
   })();
-
+  
   const moyenneBesoinPrat = (() => {
-    const arr = effectifData.map(row => {
-      const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
-      return Number(spec["Besoin Pratique par Groupe"]) || 0;
-    });
+    const arr = effectifData
+      .filter(row => row.specialite && specialties.some(s => s["Spécialité"] === row.specialite))
+      .map(row => {
+        const spec = specialties.find(s => s["Spécialité"] === row.specialite);
+        return Number(spec["Besoin Pratique par Groupe"]) || 0;
+      });
     if (arr.length === 0) return 0;
-    return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
   })();
-
+  
   const moyenneBesoinTpSpec = (() => {
-    const arr = effectifData.map(row => {
-      const spec = specialties.find(s => s["Spécialité"] === row.specialite) || {};
-      return Number(spec["Besoin TP Spécifique par Groupe"]) || 0;
-    });
+    const arr = effectifData
+      .filter(row => row.specialite && specialties.some(s => s["Spécialité"] === row.specialite))
+      .map(row => {
+        const spec = specialties.find(s => s["Spécialité"] === row.specialite);
+        return Number(spec["Besoin TP Spécifique par Groupe"]) || 0;
+      });
     if (arr.length === 0) return 0;
-    return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
   })();
 
   const moyenneSurfaceTheo = (salles?.theorie || []).length
