@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import TableauSalles from "../components/TableauSalles";
 import TableauEffectifAjout from "../components/TableauEffectifAjout";
 import TableauRepartitionAjout from "../components/TableauRepartitionAjout";
@@ -22,39 +22,21 @@ const defaultSalle = (cno, semaines, heures) => ({
 export default function TDP() {
   const pdfRef = useRef();
 
-  // حالات الجداول الثلاثة (نظرية - تطبيقية - TP spécifiques)
   const [salles, setSalles] = useState({
     theorie: [defaultSalle(1.0, 72, 56)],
     pratique: [defaultSalle(1.0, 72, 56)],
     tpSpecifiques: [defaultSalle(1.0, 72, 56)],
   });
 
-  const [cnos, setCnos] = useState({
-    theorie: 1.0,
-    pratique: 1.0,
-    tpSpecifiques: 1.0,
-  });
-  const [semaines, setSemaines] = useState({
-    theorie: 72,
-    pratique: 72,
-    tpSpecifiques: 72,
-  });
-  const [heures, setHeures] = useState({
-    theorie: 56,
-    pratique: 56,
-    tpSpecifiques: 56,
-  });
-  // Apprenants state لكل جدول (من 10 إلى 30، القيمة الافتراضية 26)
-  const [apprenants, setApprenants] = useState({
-    theorie: 26,
-    pratique: 26,
-    tpSpecifiques: 26,
-  });
+  const [cnos, setCnos] = useState({ theorie: 1.0, pratique: 1.0, tpSpecifiques: 1.0 });
+  const [semaines, setSemaines] = useState({ theorie: 72, pratique: 72, tpSpecifiques: 72 });
+  const [heures, setHeures] = useState({ theorie: 56, pratique: 56, tpSpecifiques: 56 });
+  const [apprenants, setApprenants] = useState({ theorie: 26, pratique: 26, tpSpecifiques: 26 });
 
-  // Effectif, Repartition state
   const [effectif, setEffectif] = useState([
     { specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }
   ]);
+
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
     besoinPratTotal: 0,
@@ -63,9 +45,9 @@ export default function TDP() {
     moyennePrat: 0,
     moyenneTpSpec: 0,
   });
+
   const specialties = useSpecialties();
 
-  // ملخصات القاعات (تحسب تلقائياً من state salles)
   const totalHeuresTheo = somme(salles.theorie.map(s => Number(s.heuresMax) || 0));
   const totalHeuresPrat = somme(salles.pratique.map(s => Number(s.heuresMax) || 0));
   const totalHeuresTpSpec = somme(salles.tpSpecifiques.map(s => Number(s.heuresMax) || 0));
@@ -88,7 +70,6 @@ export default function TDP() {
     moyenneSurfaceTpSpec,
   };
 
-  // handlers
   const handleEffectifChange = (rows) => {
     if (!rows || rows.length === 0) {
       setEffectif([{ specialite: "", groupes: 0, groupesAjout: 0, apprenants: 0 }]);
@@ -107,6 +88,32 @@ export default function TDP() {
       moyennePrat: r.besoinPratParGroupe ?? 0,
       moyenneTpSpec: r.moyenneTpSpecParGroupe ?? 0,
     });
+  };
+
+  // ⬇️ حفظ واسترجاع البيانات من localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("tdpData");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setSalles(parsed.salles);
+      setCnos(parsed.cnos);
+      setSemaines(parsed.semaines);
+      setHeures(parsed.heures);
+      setApprenants(parsed.apprenants);
+      setEffectif(parsed.effectif);
+      setRepartition(parsed.repartition);
+    }
+  }, []);
+
+  const handleSave = () => {
+    const data = { salles, cnos, semaines, heures, apprenants, effectif, repartition };
+    localStorage.setItem("tdpData", JSON.stringify(data));
+    alert("Les données ont été sauvegardées.");
+  };
+
+  const handleClear = () => {
+    localStorage.removeItem("tdpData");
+    window.location.reload();
   };
 
   return (
@@ -148,8 +155,8 @@ export default function TDP() {
         <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
       </div>
 
-      {/* زر الرجوع للصفحة الرئيسية بالفرنسية */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
+      {/* الأزرار في صف واحد */}
+      <div className="flex flex-wrap justify-center gap-4 mt-10">
         <button
           onClick={() => window.location.href = "/"}
           style={{
@@ -162,15 +169,45 @@ export default function TDP() {
             border: "none",
             cursor: "pointer",
             boxShadow: "0 2px 8px #0001",
-            transition: "background 0.2s"
           }}
         >
           Page d&apos;accueil
         </button>
-      </div>
 
-      {/* زر توليد ملف PDF */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+        <button
+          onClick={handleSave}
+          style={{
+            background: "#f59e0b",
+            color: "#fff",
+            padding: "12px 28px",
+            borderRadius: "8px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px #0001",
+          }}
+        >
+          Sauvegarder les données
+        </button>
+
+        <button
+          onClick={handleClear}
+          style={{
+            background: "#ef4444",
+            color: "#fff",
+            padding: "12px 28px",
+            borderRadius: "8px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px #0001",
+          }}
+        >
+          Vider les données
+        </button>
+
         <button
           onClick={() => generatePDF({ titre: "Test de Dépassement Prévu", ref: pdfRef })}
           style={{
@@ -183,7 +220,6 @@ export default function TDP() {
             border: "none",
             cursor: "pointer",
             boxShadow: "0 2px 8px #0001",
-            transition: "background 0.2s"
           }}
         >
           Générer le PDF

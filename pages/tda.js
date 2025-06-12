@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import TableauSalles from "../components/TableauSalles";
 import TableauEffectif from "../components/TableauEffectif";
 import TableauRepartition from "../components/TableauRepartition";
@@ -22,39 +22,18 @@ const defaultSalle = (cno, semaines, heures) => ({
 export default function TDA() {
   const pdfRef = useRef();
 
-  // حالات الجداول الثلاثة (نظرية - تطبيقية - TP spécifiques)
   const [salles, setSalles] = useState({
     theorie: [defaultSalle(1.0, 72, 56)],
     pratique: [defaultSalle(1.0, 72, 56)],
     tpSpecifiques: [defaultSalle(1.0, 72, 56)],
   });
 
-  const [cnos, setCnos] = useState({
-    theorie: 1.0,
-    pratique: 1.0,
-    tpSpecifiques: 1.0,
-  });
-  const [semaines, setSemaines] = useState({
-    theorie: 72,
-    pratique: 72,
-    tpSpecifiques: 72,
-  });
-  const [heures, setHeures] = useState({
-    theorie: 56,
-    pratique: 56,
-    tpSpecifiques: 56,
-  });
-  // Apprenants state لكل جدول (من 10 إلى 30، القيمة الافتراضية 26)
-  const [apprenants, setApprenants] = useState({
-    theorie: 26,
-    pratique: 26,
-    tpSpecifiques: 26,
-  });
+  const [cnos, setCnos] = useState({ theorie: 1.0, pratique: 1.0, tpSpecifiques: 1.0 });
+  const [semaines, setSemaines] = useState({ theorie: 72, pratique: 72, tpSpecifiques: 72 });
+  const [heures, setHeures] = useState({ theorie: 56, pratique: 56, tpSpecifiques: 56 });
+  const [apprenants, setApprenants] = useState({ theorie: 26, pratique: 26, tpSpecifiques: 26 });
 
-  // Effectif, Repartition state
-  const [effectif, setEffectif] = useState([
-    { specialite: "", groupes: 0, apprenants: 0 }
-  ]);
+  const [effectif, setEffectif] = useState([{ specialite: "", groupes: 0, apprenants: 0 }]);
   const [repartition, setRepartition] = useState({
     besoinTheoTotal: 0,
     besoinPratTotal: 0,
@@ -63,9 +42,21 @@ export default function TDA() {
     moyennePrat: 0,
     moyenneTpSpec: 0,
   });
+
   const specialties = useSpecialties();
 
-  // ملخصات القاعات (تحسب تلقائياً من state salles)
+  // تحميل البيانات من localStorage عند التشغيل
+  useEffect(() => {
+    const saved = localStorage.getItem("tdaData");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setSalles(parsed.salles);
+      setEffectif(parsed.effectif);
+      setRepartition(parsed.repartition);
+    }
+  }, []);
+
+  // ملخصات القاعات
   const totalHeuresTheo = somme(salles.theorie.map(s => Number(s.heuresMax) || 0));
   const totalHeuresPrat = somme(salles.pratique.map(s => Number(s.heuresMax) || 0));
   const totalHeuresTpSpec = somme(salles.tpSpecifiques.map(s => Number(s.heuresMax) || 0));
@@ -88,17 +79,12 @@ export default function TDA() {
     moyenneSurfaceTpSpec,
   };
 
-  // handlers
   const handleEffectifChange = (rows) => {
-    if (!rows || rows.length === 0) {
-      setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
-    } else {
-      setEffectif(rows);
-    }
+    setEffectif(rows.length ? rows : [{ specialite: "", groupes: 0, apprenants: 0 }]);
   };
 
   const handleRepartitionChange = (repData) => {
-    const r = (Array.isArray(repData) && repData.length > 0) ? repData[0] : {};
+    const r = Array.isArray(repData) && repData.length > 0 ? repData[0] : {};
     setRepartition({
       besoinTheoTotal: r.besoinTheoTotal ?? 0,
       besoinPratTotal: r.besoinPratTotal ?? 0,
@@ -107,6 +93,33 @@ export default function TDA() {
       moyennePrat: r.besoinPratParGroupe ?? 0,
       moyenneTpSpec: r.moyenneTpSpecParGroupe ?? 0,
     });
+  };
+
+  // حفظ البيانات في localStorage
+  const handleSave = () => {
+    const data = { salles, effectif, repartition };
+    localStorage.setItem("tdaData", JSON.stringify(data));
+    alert("Les données ont été enregistrées !");
+  };
+
+  // إعادة التهيئة
+  const handleReset = () => {
+    localStorage.removeItem("tdaData");
+    setSalles({
+      theorie: [defaultSalle(1.0, 72, 56)],
+      pratique: [defaultSalle(1.0, 72, 56)],
+      tpSpecifiques: [defaultSalle(1.0, 72, 56)],
+    });
+    setEffectif([{ specialite: "", groupes: 0, apprenants: 0 }]);
+    setRepartition({
+      besoinTheoTotal: 0,
+      besoinPratTotal: 0,
+      besoinTpSpecTotal: 0,
+      moyenneTheo: 0,
+      moyennePrat: 0,
+      moyenneTpSpec: 0,
+    });
+    alert("Les données ont été réinitialisées.");
   };
 
   return (
@@ -147,45 +160,31 @@ export default function TDA() {
         <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
       </div>
 
-      {/* زر الرجوع للصفحة الرئيسية بالفرنسية */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
+      {/* الأزرار في صف أفقي */}
+      <div className="flex flex-wrap justify-center gap-4 mt-10">
         <button
           onClick={() => window.location.href = "/"}
-          style={{
-            background: "#2563eb",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-            transition: "background 0.2s"
-          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md shadow"
         >
           Page d&apos;accueil
         </button>
-      </div>
-
-      {/* زر توليد ملف PDF */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
         <button
           onClick={() => generatePDF({ titre: "Test de Dépassement Actuel", ref: pdfRef })}
-          style={{
-            background: "#10b981",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-            transition: "background 0.2s"
-          }}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md shadow"
         >
           Générer le PDF
+        </button>
+        <button
+          onClick={handleSave}
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-md shadow"
+        >
+          💾 Enregistrer les modifications
+        </button>
+        <button
+          onClick={handleReset}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md shadow"
+        >
+          🗑️ Réinitialiser
         </button>
       </div>
     </div>
