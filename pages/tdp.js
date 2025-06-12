@@ -164,7 +164,7 @@ export default function TDP() {
             transition: "background 0.2s"
           }}
         >
-          Page d'accueil
+          Page d&apos;accueil
         </button>
       </div>
     </div>
