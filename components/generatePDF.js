@@ -1,35 +1,55 @@
 // components/generatePDF.js
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
-export default function generatePDF({ tables, page }) {
-  const doc = new jsPDF();
+export function generatePDF({ titre, tables }) {
+  if (typeof window === 'undefined') return; // حماية في بيئة SSR
 
-  const titre =
-    page === "tda"
-      ? "Rapport de diagnostic de la capacité d'accueil actuelle"
-      : "Rapport de diagnostic de la capacité d'accueil prévue";
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
 
-  doc.setFontSize(14);
-  doc.text(titre, 105, 15, { align: "center" });
+  // Titre principal
+  pdf.setFontSize(16);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(titre, pageWidth / 2, 20, { align: 'center' });
 
-  let finalY = 25;
+  // Informations générales
+  const nomStructure = localStorage.getItem('nomStructure') || 'Structure inconnue';
+  const numEnregistrement = localStorage.getItem('numEnregistrement') || '---';
+  const dateGeneration = new Date().toLocaleDateString();
 
-  tables.forEach(({ titre, colonnes, lignes }) => {
-    doc.setFontSize(11);
-    doc.text(titre, 14, finalY);
-    autoTable(doc, {
-      startY: finalY + 5,
-      head: [colonnes],
-      body: lignes,
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Nom de la structure : ${nomStructure}`, 14, 30);
+  pdf.text(`N° d'enregistrement : ${numEnregistrement}`, 14, 36);
+  pdf.text(`Date de génération : ${dateGeneration}`, 14, 42);
+
+  let currentY = 50;
+
+  // Affichage des tableaux
+  tables.forEach((table) => {
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(table.title, 14, currentY);
+    currentY += 4;
+
+    autoTable(pdf, {
+      startY: currentY,
+      head: [table.columns],
+      body: table.rows,
       styles: { fontSize: 9 },
+      theme: 'grid',
+      headStyles: { fillColor: [41, 128, 185] },
       margin: { left: 14, right: 14 },
-      theme: "grid",
       didDrawPage: (data) => {
-        finalY = data.cursor.y + 10;
+        currentY = data.cursor.y + 10;
       },
     });
   });
 
-  doc.save("rapport.pdf");
+  const cleanTitle = titre.replace(/\s+/g, '_');
+  const dateStr = new Date().toISOString().split('T')[0];
+  const fileName = `${cleanTitle}_${nomStructure.replace(/\s+/g, '_')}_${dateStr}.pdf`;
+
+  pdf.save(fileName);
 }
