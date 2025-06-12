@@ -79,6 +79,16 @@ export default function ResultsContainer() {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   })();
   
+  console.log("---- DEBUG ----");
+console.log("effectifData:", effectifData);
+console.log("specialties:", specialties);
+console.log("arr TP Spec:", effectifData
+  .filter(row => row.specialite && specialties.some(s => s["Spécialité"] === row.specialite))
+  .map(row => {
+    const spec = specialties.find(s => s["Spécialité"] === row.specialite);
+    return Number(spec["Besoin TP Spécifique par Groupe"]) || 0;
+  })
+);
   const moyenneBesoinTpSpec = (() => {
     const arr = effectifData
       .filter(row => row.specialite && specialties.some(s => s["Spécialité"] === row.specialite))
