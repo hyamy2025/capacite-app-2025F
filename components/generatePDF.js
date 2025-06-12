@@ -6,7 +6,10 @@ export async function generatePDF({ titre, ref }) {
   if (!element) return;
 
   try {
+    console.log('Début génération PDF...');
     const canvas = await html2canvas(element, { scale: 2 });
+    console.log('Capture html2canvas terminée.');
+
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -16,7 +19,34 @@ export async function generatePDF({ titre, ref }) {
     const numEnregistrement = localStorage.getItem('numEnregistrement') || '---';
     const dateGeneration = new Date().toLocaleDateString();
 
-    // *** Ici on skip l'ajout du logo pour éviter erreur ***
+    // Logo ministère (image base64 à remplacer si besoin)
+    const logoUrl = '/logo-ministere.png'; // S’assurer que cette image existe dans public/
+    console.log(`Chargement du logo depuis: ${logoUrl}`);
+
+    const logo = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = logoUrl;
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        console.log('Logo chargé avec succès.');
+        resolve(img);
+      };
+      img.onerror = (err) => {
+        console.error('Erreur lors du chargement du logo.', err);
+        reject(err);
+      };
+    });
+
+    // Convertir logo en DataURL
+    const logoCanvas = document.createElement('canvas');
+    logoCanvas.width = logo.width;
+    logoCanvas.height = logo.height;
+    const ctx = logoCanvas.getContext('2d');
+    ctx.drawImage(logo, 0, 0);
+    const logoData = logoCanvas.toDataURL('image/png');
+
+    // Affichage logo
+    pdf.addImage(logoData, 'PNG', 10, 10, 30, 30);
 
     // Titre au centre
     pdf.setFontSize(18);
@@ -43,8 +73,9 @@ export async function generatePDF({ titre, ref }) {
     const fileName = `${cleanTitle}_${nomStructure.replace(/\s+/g, '_')}_${dateStr}.pdf`;
 
     pdf.save(fileName);
+    console.log('PDF généré et sauvegardé:', fileName);
   } catch (error) {
     alert("Erreur lors de la création du PDF. Veuillez réessayer.");
-    console.error(error);
+    console.error('Erreur dans generatePDF:', error);
   }
 }
