@@ -28,9 +28,6 @@ export async function generatePDF({ titre, ref }) {
     pdf.addImage(imgData, 'PNG', 10, 45, pdfWidth, pdfHeight);
     pdf.save(`${titre.replace(/\s+/g, '_')}.pdf`);
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Erreur PDF:', error);
-    }
+    alert("Erreur lors de la création du PDF. Veuillez réessayer.");
   }
 }
-
