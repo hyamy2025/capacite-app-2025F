@@ -18,8 +18,11 @@ const defaultSalle = (cno, semaines, heures, maxApprenants) => ({
   heuresMax: Math.round(semaines * heures),
 });
 
+import { useRouter } from "next/router";
+
 export default function TDA() {
   const pdfRef = useRef();
+  const router = useRouter();
 
   // حالات الجداول الثلاثة (نظرية - تطبيقية - TP spécifiques)
   const [salles, setSalles] = useState({
@@ -144,6 +147,27 @@ export default function TDA() {
           salles={salles}
         />
         <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
+      </div>
+
+      {/* زر الرجوع للصفحة الرئيسية */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            background: "#2563eb",
+            color: "#fff",
+            padding: "12px 28px",
+            borderRadius: "8px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            border: "none",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px #0001",
+            transition: "background 0.2s"
+          }}
+        >
+          الرجوع إلى الصفحة الرئيسية
+        </button>
       </div>
     </div>
   );
