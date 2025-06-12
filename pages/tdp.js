@@ -155,74 +155,31 @@ export default function TDP() {
         <TableauResultats titre="Résultat" data={resultatsData} salles={salles} />
       </div>
 
-      {/* الأزرار في صف واحد */}
+      {/* الأزرار في صف أفقي */}
       <div className="flex flex-wrap justify-center gap-4 mt-10">
         <button
           onClick={() => window.location.href = "/"}
-          style={{
-            background: "#2563eb",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md shadow"
         >
           Page d&apos;accueil
         </button>
-
         <button
-          onClick={handleSave}
-          style={{
-            background: "#f59e0b",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-          }}
-        >
-          Sauvegarder les données
-        </button>
-
-        <button
-          onClick={handleClear}
-          style={{
-            background: "#ef4444",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-          }}
-        >
-          Vider les données
-        </button>
-
-        <button
-          onClick={() => generatePDF({ titre: "Test de Dépassement Prévu", ref: pdfRef })}
-          style={{
-            background: "#10b981",
-            color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #0001",
-          }}
+          onClick={() => generatePDF({ titre: "Test de Dépassement Actuel", ref: pdfRef })}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md shadow"
         >
           Générer le PDF
+        </button>
+        <button
+          onClick={handleSave}
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-md shadow"
+        >
+          💾 Enregistrer les modifications
+        </button>
+        <button
+          onClick={handleReset}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md shadow"
+        >
+          🗑️ Réinitialiser
         </button>
       </div>
     </div>
