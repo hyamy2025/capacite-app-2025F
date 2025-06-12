@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export function generatePDF({ titre, tables }) {
-  if (typeof window === 'undefined') return; // حماية في بيئة SSR
+  if (typeof window === 'undefined') return; // Empêcher l'exécution côté serveur
 
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -26,7 +26,7 @@ export function generatePDF({ titre, tables }) {
 
   let currentY = 50;
 
-  // Affichage des tableaux
+  // Parcours et affichage des tableaux
   tables.forEach((table) => {
     pdf.setFontSize(13);
     pdf.setFont('helvetica', 'bold');
@@ -47,6 +47,7 @@ export function generatePDF({ titre, tables }) {
     });
   });
 
+  // Enregistrement du fichier
   const cleanTitle = titre.replace(/\s+/g, '_');
   const dateStr = new Date().toISOString().split('T')[0];
   const fileName = `${cleanTitle}_${nomStructure.replace(/\s+/g, '_')}_${dateStr}.pdf`;
